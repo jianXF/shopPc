@@ -17,7 +17,19 @@ import login from "./component/outer/login.vue";
 
 //menus的子模块
 import shouye from "./component/menus/shouye.vue";
-
+import complaint from "./component/menus/complaint.vue";
+import conment from "./component/menus/conment.vue";
+import goodsAdmin from "./component/menus/goodsAdmin.vue";
+import goodsKind from "./component/menus/goodsKind.vue";
+import insertGoods from "./component/menus/insertGoods.vue";
+import message from "./component/menus/message.vue";
+import orderAdmin from "./component/menus/orderAdmin.vue";
+import orderDetail from "./component/menus/orderDetail.vue";
+import sellerAdmin from "./component/menus/sellerAdmin.vue";
+import updateGoods from "./component/menus/updateGoods.vue";
+import userAdmin from "./component/menus/userAdmin.vue";
+import updateInfo from "./component/menus/updateInfo.vue";
+import updatePassword from "./component/menus/updatePassword.vue";
 
 
 //状态管理
@@ -41,7 +53,60 @@ var router = new VueRouter({
         children: [{
             path: 'index',
             component: shouye
-        }]
+        },
+        {
+            path: 'complaint',
+            component: complaint
+        },
+        {
+            path: 'conment',
+            component: conment
+        },
+        {
+            path: 'goodsAdmin',
+            component: goodsAdmin
+        },
+        {
+            path: 'goodsKind',
+            component: goodsKind
+        },
+        {
+            path: 'insertGoods',
+            component: insertGoods
+        },
+        {
+            path: 'message',
+            component: message
+        },
+        {
+            path: 'orderAdmin',
+            component: orderAdmin
+        },
+        {
+            path: 'orderDetail',
+            component: orderDetail
+        },
+        {
+            path: 'sellerAdmin',
+            component: sellerAdmin
+        },
+        {
+            path: 'updateGoods',
+            component: updateGoods
+        },
+        {
+            path: 'userAdmin',
+            component: userAdmin
+        },
+        {
+            path: 'updateInfo',
+            component: updateInfo
+        },
+        {
+            path: 'updatePassword',
+            component: updatePassword
+        }
+    ]
     }]
 })
 

@@ -38,7 +38,7 @@
             </el-form-item>
             <el-form-item label="描述" prop="desc" 
                 :rules="[{ validator: validateDesc, trigger: 'change' }]">
-                <el-input v-model="form.desc" type="textarea"   placeholder="请输入对店铺描述"></el-input>
+                <el-input v-model="form.desc" type="textarea" :rows="4"   placeholder="请输入对店铺描述"></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button  type="primary" style="width:40%" @click="regSubmit('form')">注册</el-button>
