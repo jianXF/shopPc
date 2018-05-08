@@ -1,0 +1,25 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-size:14px;
+}
+a{
+	text-decoration: none;
+}
+li{
+	list-style: none;
+}
+i,em{
+	font-style: normal;
+	font-weight: 500;
+	
+}
+.el-submenu .el-submenu__title:hover{
+    background-color: #3f4246;
+}
+.el-submenu .el-menu-item:focus, .el-menu-item:hover{
+	background-color: #3f4246;
+}
+.el-menu-item-group__title{
+    padding: 0;
+}
