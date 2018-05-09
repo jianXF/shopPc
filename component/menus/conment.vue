@@ -87,16 +87,16 @@
             </el-table-column>
         </el-table>
 
-        <el-dialog title="收货地址" :visible.sync="dialogFormVisible" class="dialog">
+        <el-dialog title="评价回复" :visible.sync="dialogFormVisible" class="dialog">
             <el-form :model="deliveryForm" ref="deliveryForm"> 
-                <el-form-item label="快递单号" :label-width="formLabelWidth" prop='repalyTime' :style="{display:deliveryForm.isReply?'block':'none'}">
+                <el-form-item label="回复日期" :label-width="formLabelWidth" prop='repalyTime' :style="{display:deliveryForm.isReply?'block':'none'}">
                       <el-date-picker format="yyyyMMdd" value-format="yyyyMMdd" type="date"
-                       placeholder="选择日期" v-model="deliveryForm.repalyTime" style="width: 80%;"></el-date-picker>
+                        v-model="deliveryForm.repalyTime" style="width: 80%;"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="快递公司" :label-width="formLabelWidth" prop='repalyCon'
+                <el-form-item label="回复内容" :label-width="formLabelWidth" prop='repalyCon'
                     :rules="[{ required: true, message: '请输入快递公司名称', trigger: 'blur' },
                         { validator: validateTitle, trigger: 'change' }]">
-                    <el-input type="textarea" v-model="deliveryForm.repalyCon"></el-input>
+                    <el-input type="textarea" v-model="deliveryForm.repalyCon" :rows="4"></el-input>
                 </el-form-item>
                
             </el-form>

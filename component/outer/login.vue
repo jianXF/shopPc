@@ -88,9 +88,12 @@
                 callback();
                 }
             },
+            //电商登陆
             loginSubmit(formName){
                  this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        
+                        sessionStorage.setItem('type','1');
                         this.$router.push({path:'/menus/index'});
                     } else {
                         console.log('error submit!!');
@@ -98,10 +101,12 @@
                     }
                  });
             },
+            //管理员登陆
             loginSubmit1(formName){
                  this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        alert('submit!');
+                        sessionStorage.setItem('type','2');
+                        this.$router.push({path:'/menus/index'});
                     } else {
                         console.log('error submit!!');
                         return false;

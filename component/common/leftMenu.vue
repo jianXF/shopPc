@@ -126,7 +126,7 @@
                                 path:'/menus/userAdmin'
                             },{
                                 index:'3-2',
-                                name:'用户留言',
+                                name:'留言投诉',
                                 path:'/menus/message'
                             }]
                         }
@@ -143,6 +143,12 @@
             },
             handleClose(key, keyPath) {
                 console.log(key, keyPath);
+            }
+        },
+        mounted(){
+            const type = sessionStorage.getItem('type');
+            if(type=='2'){
+                this.menus = this.menus1;
             }
         }
     }

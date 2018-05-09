@@ -188,6 +188,10 @@
                 console.log(this.form.date1);
 
             },
+            //编辑
+            handleClick(obj){
+                
+            },
             //促销商品
             bargainGoods(obj){
             this.$prompt('请输入促销的价格', '设置促销价', {

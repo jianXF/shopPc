@@ -1,7 +1,7 @@
 <template>
     <div id="header">
         <div class="title">
-            <img :src="user.logo" alt="">
+            <img :src="user.logo" alt="" :style="{opacity:type=='1'?'1':'0'}">
             <el-dropdown @command="clickMenu">
                 <span class="el-dropdown-link">
                     <span v-text="user.title"></span>
@@ -10,7 +10,7 @@
                 <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item v-for="i in menus" :command="i.path" v-text="i.title"></el-dropdown-item>
                 </el-dropdown-menu>
-                </el-dropdown>
+            </el-dropdown>
         </div>
     </div>
   
@@ -24,6 +24,7 @@ import src from "../../img/user.jpg";
         },
         data(){
             return {
+                type:'1',
                 user:{
                     logo:src,
                     title:'哈开始觉得'
@@ -31,18 +32,22 @@ import src from "../../img/user.jpg";
                 menus:[
                     {
                         id:1,
-                        path:'',
                         title:'修改店铺信息',
                         path:'/menus/updateInfo'
                     },
                      {
                          id:2,
-                        path:'',
                         title:'修改密码',
                         path:'/menus/updatePassword'
                     },{
                         id:3,
-                        path:'',
+                        title:'退出',
+                        path:''
+                    }
+                ],
+                menus1:[
+                    {
+                        id:1,
                         title:'退出',
                         path:''
                     }
@@ -61,7 +66,6 @@ import src from "../../img/user.jpg";
                         cancelButtonText: '取消',
                         type: 'warning'
                     }).then(() => {
-                        
                         this.$message({
                             type: 'success',
                             message: '退出成功!'
@@ -73,6 +77,13 @@ import src from "../../img/user.jpg";
                 }
                     
                 
+            }
+        },
+        mounted(){
+             const type = sessionStorage.getItem('type');
+            if(type=='2'){
+                this.menus = this.menus1;
+                this.type='2';
             }
         }
     }
@@ -86,7 +97,7 @@ import src from "../../img/user.jpg";
     height:55px;
     background-color: rgb(84, 92, 100);
     color: white;
-    z-index: 9999;
+    z-index: 2000;
 }
 .title{
     float: right;

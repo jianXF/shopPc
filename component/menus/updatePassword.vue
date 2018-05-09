@@ -92,7 +92,7 @@ export default {
         } else {
           callback();
         }
-      },
+      }
       
      
   }

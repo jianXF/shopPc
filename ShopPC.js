@@ -2,8 +2,11 @@ var express = require("express");
 var app = express();
 var mysql = require("mysql");
 var bodyParser = require("body-parser");
+var multer = require("multer");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+//配置静态文件
+app.use(express.static('../public'));
 //实例化express
 var connection = mysql.createConnection({
     host:"rm-wz9mx3p81r9b6sxr9yo.mysql.rds.aliyuncs.com",
@@ -13,11 +16,73 @@ var connection = mysql.createConnection({
 	});
 connection.connect();
 
+// 上传图片
+var storage = multer.diskStorage({
+	//存储文件地方
+	destination: function(req, res, cb) {
+		cb(null, "./public/logo");
+	},
+	//存储文件名字
+	filename: function(req, file, cb) {
+		var fileFormat = file.originalname.split(".");
+		cb(null, file.fieldname + '-' + Date.now() + "." + fileFormat [fileFormat.length - 1])
+	}
+})
+//配置上传参数
+var upload = multer({
+	storage: storage
+})
+app.post("/uploadLogo", upload.any(), function(req, res) {
+	res.append("Access-Control-Allow-Origin", "*");
+	if(req.files.length == 0) {
+		res.send('');
+	} else {
+        console.log(req.files[0]);
+		res.send(req.files[0].filename);
+	}
+	//console.log(req.files[0])
+})
 
+//手机号查重
+app.post('/reg/checkTel', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql=`SELECT * FROM seller_info where tel='${req.body.tel}'`;
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        if(results.length==0){
+            res.send('success');
+        }else{
+            res.send('该手机号已被注册,请登陆');
+        }
+        
+    });
+});
 
-
-
+//用户注册
+app.post('/reg', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    const regTime = timeChange();
+    console.log(req.body.img);
+    var sql='INSERT INTO seller_info(tel,`password`,img,sellerTitle,`desc`,goodNum,goodsell,regTime,`status`) VALUES '+`
+    ('${req.body.tel}','${req.body.password}','${req.body.img}','${req.body.sellerTitle}','${req.body.desc}',0,0,${regTime},'1')`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+    });
+});
 
 app.listen(2015);
 console.log("开启服务器");
 
+//时间函数
+function timeChange(){ 
+    var time = new Date();
+    return ""+time.getFullYear()+stringNum(time.getMonth())+stringNum(time.getDate())+stringNum(time.getHours())+stringNum(time.getMinutes())+stringNum(time.getSeconds())+"";
+}
+function stringNum(ti){
+    if(ti<10){
+        ti="0"+ti;
+    }
+    return ti;
+}

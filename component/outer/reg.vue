@@ -1,21 +1,14 @@
 <template>
     <div>
         <h3 class="farmOA">淘乡村后台管理系统</h3>
+        <el-tooltip class="item" effect="dark" content="上传您的店铺Logo" placement="right-start">
+          <form action="" id="file">
+            <input type="file" id="fileInput"  name="sellerlogo" nultiple @change="showuserimg">
+            <i  class="el-icon-plus avatar-uploader-icon" ></i>
+            <img :src="imageUrl" alt="">
+          </form>
+        </el-tooltip>
         <el-form ref="form" :model="form" label-width="80px" class="regOA">
-            <el-form-item>
-                <el-tooltip class="item" effect="dark" content="上传您的店铺Logo" placement="right-start">
-                    <el-upload
-                        class="avatar-uploader"
-                        action="https://jsonplaceholder.typicode.com/posts/"
-                        :show-file-list="false"
-                        :on-success="handleAvatarSuccess"
-                        :before-upload="beforeAvatarUpload">
-                        <img v-if="imageUrl" :src="imageUrl" class="avatar">
-                        <i v-else class="el-icon-plus avatar-uploader-icon" ></i>
-                    </el-upload>
-                </el-tooltip>
-                
-            </el-form-item>
             <el-form-item label="电话"  prop="tel"
                 :rules="[{ required: true, message: '请输入您的电话', trigger: 'blur' },
                         { validator: validateTel, trigger: 'change' }]">
@@ -44,7 +37,7 @@
                 <el-button  type="primary" style="width:40%" @click="regSubmit('form')">注册</el-button>
                 <el-button  type="primary" style="width:40%" @click="cancleReg" >取消</el-button>
             </el-form-item>
-        </el-form>
+        </el-form>        
     </div>
   
 </template>
@@ -64,8 +57,8 @@ export default {
             pass:'',
             repass:'',
             sellerTitle:'',
-            desc:''
-            
+            desc:'',
+            img:''
         },
         // 上传logo
         imageUrl: ''
@@ -73,13 +66,59 @@ export default {
   },
   methods: {
       //注册事件
-      regSubmit(formName){
-          this.$refs[formName].validate((valid) => {
+      async regSubmit(formName){
+       const _this = this;
+          this.$refs[formName].validate(async(valid) => {
           if (valid) {
-            alert('submit!');
-          } else {
-            console.log('error submit!!');
-            return false;
+            this.upload();
+            let isReapt = true;
+            await $.ajax({
+                url:"http://localhost:2015/reg/checkTel",
+                type:"POST",
+                data:{
+                    tel:_this.form.tel
+                },
+                success:function(data){
+                  if(data=='success'){
+                      isReapt = false;
+                  }else{
+                    _this.$message({
+                      message: data,
+                      type: 'warning'
+                    });
+                  }
+                }
+            })
+            if(!isReapt){
+                await $.ajax({
+                url:"http://localhost:2015/reg",
+                type:"POST",
+                data:{
+                  tel:_this.form.tel,
+                  password:_this.form.pass,
+                  img:_this.form.img,
+                  sellerTitle:_this.form.sellerTitle,
+                  desc:_this.form.sellerTitle
+                },
+                success: function(data){
+                  if(data=='success'){
+                    _this.$message({
+                        message: '注册成功，等待管理员审核',
+                        type: 'success'
+                      });
+                    _this.$router.push({path:'/login'});
+                  }else{
+                    _this.$message({
+                        message: '注册失败',
+                        type: 'warning'
+                      });
+                  }
+                }
+            })
+            }
+            
+          }else{
+
           }
         });
       },
@@ -127,34 +166,34 @@ export default {
       cancleReg(){
         this.$router.push({path:'/login'});
       },
-      handleAvatarSuccess(res, file) {
-        this.imageUrl = URL.createObjectURL(file.raw);
-        console.log(res);
-       
-      },
-      beforeAvatarUpload(file) {
-        const isJPG = file.type === 'image/jpeg';
-        const isLt2M = file.size / 1024 / 1024 < 2;
-        
-        if (!isJPG) {
-          this.$message.error('上传头像图片只能是 JPG 格式!');
-        }
-        if (!isLt2M) {
-          this.$message.error('上传头像图片大小不能超过 2MB!');
-        }
-        return isJPG && isLt2M;
-      },
-      showuserimg(){
-        var uploaderInput = $("#uploaderInput");
-        var imgFile = uploaderInput[0].files[0];
-        
-        var fr = new FileReader();
-        fr.onload = function() {
-            var pic=$("#upuserpic");
-            pic[0].src = fr.result;
-        };
-        fr.readAsDataURL(imgFile);
-    }
+      //页面显示
+      showuserimg() {
+        const _this = this;
+				var uploaderInput = $("#fileInput");
+				var imgFile = uploaderInput[0].files[0];
+				var fr = new FileReader();
+				fr.onload = function() {
+          _this.imageUrl=fr.result;
+				};
+				fr.readAsDataURL(imgFile);
+			},
+    //将图片存数据库，得到存数据库的路径
+      upload(){
+        const _this = this;
+         $.ajax({
+          url:"http://localhost:2015/uploadLogo",
+          type:"POST",
+          async:false,
+          processData:false,
+              contentType:false,
+              cache:false,
+              data:new FormData($("#file")[0]),
+              success:function(data){
+                _this.form.img = data;
+              }
+        });
+      }
+
   }
 };
 </script>
@@ -163,7 +202,8 @@ export default {
   color: #409eff;
   font-size: 24px;
   text-align: center;
-  margin: 50px 0;
+  margin: auto;
+  margin-top: 30px;
 }
 .regOA{
     width: 400px;
@@ -190,5 +230,33 @@ export default {
     border-radius: 50%;
     /* border:1px dashed darkgray; */
     margin: auto;
+}
+#file{
+    width:60px;
+    height: 60px;
+    border-radius: 50%;
+    border:1px dashed darkgray;
+    margin: auto;
+    position: relative;
+    margin: 20px auto;
+}
+#file input{
+  position: absolute;
+  top:0;
+  left:0px;
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  opacity: 0;
+}
+#file img{
+  position: absolute;
+  top:0;
+  left:0px;
+  z-index: 19;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
 }
 </style>
