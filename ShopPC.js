@@ -58,20 +58,43 @@ app.post('/reg/checkTel', function(req,res) {
     });
 });
 
+//电商登录
+app.post('/login/seller', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    const regTime = timeChange();
+    console.log(regTime);
+    var sql= `SELECT * FROM seller_info where tel='${req.body.tel}' and password='${req.body.password}'`;
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        const data={
+            code:'',
+            data:{},
+            message:''
+        }
+        if(results.length == 0){
+            data.code = '-1';
+            data.message='用户名或密码错误';
+        }else{
+            data.code = '0';
+            data.data = results[0];
+            data.message="success";
+        }
+        res.send(data);
+    });
+});
+
+
 //用户注册
 app.post('/reg', function(req,res) {
     res.append("Access-Control-Allow-Origin","*");
     const regTime = timeChange();
-    console.log(req.body.img);
     var sql='INSERT INTO seller_info(tel,`password`,img,sellerTitle,`desc`,goodNum,goodsell,regTime,`status`) VALUES '+`
     ('${req.body.tel}','${req.body.password}','${req.body.img}','${req.body.sellerTitle}','${req.body.desc}',0,0,${regTime},'1')`;
-    console.log(sql);
     connection.query(sql, function (error, results, fields) {   
         if (error) throw error;
         res.send('success');
     });
 });
-
 app.listen(2015);
 console.log("开启服务器");
 

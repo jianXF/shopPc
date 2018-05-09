@@ -90,11 +90,30 @@
             },
             //电商登陆
             loginSubmit(formName){
-                 this.$refs[formName].validate((valid) => {
+                const _this = this;
+                 this.$refs[formName].validate(async(valid) => {
                     if (valid) {
-                        
-                        sessionStorage.setItem('type','1');
-                        this.$router.push({path:'/menus/index'});
+                        await $.ajax({
+                            url:"http://localhost:2015/login/seller",
+                            type:"POST",
+                            data:{
+                                tel:_this.form.tel,
+                                password:_this.form.pass
+                            },
+                            success:function(data){
+                                if(data.code==0){
+                                    sessionStorage.setItem('type','1');
+                                    sessionStorage.setItem('sellerId',data.data.sellerId);
+                                    sessionStorage.setItem('logo',data.data.img);
+                                    _this.$router.push({path:'/menus/index'});
+                                }else{
+                                    _this.$message({
+                                        message: data.message,
+                                        type: 'warning'
+                                    });
+                                }
+                            }
+                        })
                     } else {
                         console.log('error submit!!');
                         return false;
