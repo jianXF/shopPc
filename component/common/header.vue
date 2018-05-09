@@ -66,6 +66,7 @@ import src from "../../img/user.jpg";
                         cancelButtonText: '取消',
                         type: 'warning'
                     }).then(() => {
+                        sessionStorage.clear();
                         this.$message({
                             type: 'success',
                             message: '退出成功!'
@@ -84,6 +85,11 @@ import src from "../../img/user.jpg";
             if(type=='2'){
                 this.menus = this.menus1;
                 this.type='2';
+                
+            }else{
+                this.type='1';
+                this.user.logo = sessionStorage.getItem('logo');
+                this.user.title = sessionStorage.getItem('tel');
             }
         }
     }

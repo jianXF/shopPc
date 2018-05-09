@@ -98,7 +98,7 @@ export default {
                   password:_this.form.pass,
                   img:_this.form.img,
                   sellerTitle:_this.form.sellerTitle,
-                  desc:_this.form.sellerTitle
+                  desc:_this.form.desc
                 },
                 success: function(data){
                   if(data=='success'){

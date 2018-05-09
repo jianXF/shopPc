@@ -6,22 +6,15 @@
                 <el-breadcrumb-item>修改店铺信息</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-       
+       <el-tooltip class="item" effect="dark" content="点击修改您的店铺Logo" placement="right-start">
+          <form action="" id="file">
+            <input type="file" id="fileInput"  name="sellerlogo" nultiple @change="showuserimg">
+            <i  class="el-icon-plus avatar-uploader-icon" ></i>
+            <img :src="imageUrl" alt="">
+          </form>
+        </el-tooltip>
         <el-form ref="form" :model="form" label-width="80px" class="regOA">
-            <el-form-item>
-                <el-tooltip class="item" effect="dark" content="上传您的店铺Logo" placement="right-start">
-                    <el-upload
-                        class="avatar-uploader"
-                        action="https://jsonplaceholder.typicode.com/posts/"
-                        :show-file-list="false"
-                        :on-success="handleAvatarSuccess"
-                        :before-upload="beforeAvatarUpload">
-                        <img v-if="imageUrl" :src="imageUrl" class="avatar">
-                        <i v-else class="el-icon-plus avatar-uploader-icon" ></i>
-                    </el-upload>
-                </el-tooltip>
-                
-            </el-form-item>
+
             <el-form-item label="电话"  prop="tel"
                 :rules="[{ required: true, message: '请输入您的电话', trigger: 'blur' },
                         { validator: validateTel, trigger: 'change' }]">
@@ -57,22 +50,110 @@ export default {
         form:{
             tel:'15027453455',
             sellerTitle:'贺卡收到商城',
-            desc:'阿娇是快递就拉上看到就拉开卢卡斯的拉克丝了那份呢'
-            
+            desc:'阿娇是快递就拉上看到就拉开卢卡斯的拉克丝了那份呢',
+            img:''
         },
         // 上传logo
-        imageUrl: src
+        imageUrl: ""
     };
+  },
+ async mounted(){
+    const _this =this;
+    await $.ajax({
+        url:"http://localhost:2015/find/sellerId",
+        type:"GET",
+        data:{
+            sellerId:sessionStorage.getItem('sellerId')
+        },
+        success:function(data){
+          _this.form.tel = data.tel;
+          _this.form.sellerTitle = data.sellerTitle;
+          _this.form.desc = data.desc;
+          _this.form.img = data.img;
+          _this.imageUrl = data.img;
+          //sessionStorage.setItem('logo',data.img);
+        }
+    })
   },
   methods: {
       //确认修改事件
       updateSubmit(formName){
-          this.$refs[formName].validate((valid) => {
+        const _this = this;
+        this.upload();
+          this.$refs[formName].validate(async(valid) => {
           if (valid) {
-            alert('submit!');
+            var isReapt = true;
+            if(_this.form.tel!=sessionStorage.getItem('tel')){
+              await $.ajax({
+                url:"http://localhost:2015/reg/checkTel",
+                type:"POST",
+                data:{
+                    tel:_this.form.tel
+                },
+                success:function(data){
+                  if(data=='success'){
+                      isReapt = false;
+                  }else{
+                    _this.$message({
+                      message: data,
+                      type: 'warning'
+                    });
+                  }
+                }
+            })
+            }else{
+              isReapt = false;
+            }
+            if(!isReapt){
+              if(_this.form.img==""){
+                _this.form.img = sessionStorage.getItem('logo');
+              }
+                await $.ajax({
+                    url:"http://localhost:2015/updateInfo",
+                    type:"POST",
+                    data:{
+                      sellerId:sessionStorage.getItem('sellerId'),
+                      tel:_this.form.tel,
+                      password:_this.form.sellerTitle,
+                      img:_this.form.img,
+                      sellerTitle:_this.form.sellerTitle,
+                      desc:_this.form.desc
+                    },
+                    success: function(data){
+                      if(data=='success'){
+                        _this.$message({
+                            message: '修改成功',
+                            type: 'success'
+                          });
+                      }else{
+                        _this.$message({
+                            message: '修改失败',
+                            type: 'warning'
+                          });
+                      }
+                    }
+              });
+              await $.ajax({
+                url:"http://localhost:2015/find/sellerId",
+                type:"GET",
+                data:{
+                    sellerId:sessionStorage.getItem('sellerId')
+                },
+                success:function(data){
+                  console.log(data);
+                  _this.form.tel = data.tel;
+                  _this.form.sellerTitle = data.sellerTitle;
+                  _this.form.desc = data.desc;
+                  _this.form.img = data.img;
+                  _this.imageUrl = data.img;
+                  sessionStorage.setItem('logo',data.img);
+                  sessionStorage.setItem('tel',data.tel);
+                }
+            })
+            }
+            
           } else {
             console.log('error submit!!');
-            return false;
           }
         });
       },
@@ -104,41 +185,40 @@ export default {
       cancleReg(){
         this.$router.push({path:'/login'});
       },
-      handleAvatarSuccess(res, file) {
-        this.imageUrl = URL.createObjectURL(file.raw);
-        console.log(res);
-       
-      },
-      beforeAvatarUpload(file) {
-        const isJPG = file.type === 'image/jpeg';
-        const isLt2M = file.size / 1024 / 1024 < 2;
-        
-        if (!isJPG) {
-          this.$message.error('上传头像图片只能是 JPG 格式!');
-        }
-        if (!isLt2M) {
-          this.$message.error('上传头像图片大小不能超过 2MB!');
-        }
-        return isJPG && isLt2M;
-      },
-      showuserimg(){
-        var uploaderInput = $("#uploaderInput");
-        var imgFile = uploaderInput[0].files[0];
-        
-        var fr = new FileReader();
-        fr.onload = function() {
-            var pic=$("#upuserpic");
-            pic[0].src = fr.result;
-        };
-        fr.readAsDataURL(imgFile);
-    }
+      //页面显示
+      showuserimg() {
+        const _this = this;
+				var uploaderInput = $("#fileInput");
+				var imgFile = uploaderInput[0].files[0];
+				var fr = new FileReader();
+				fr.onload = function() {
+          _this.imageUrl=fr.result;
+				};
+				fr.readAsDataURL(imgFile);
+			},
+      //将图片存数据库，得到存数据库的路径
+      upload(){
+        const _this = this;
+         $.ajax({
+          url:"http://localhost:2015/uploadLogo",
+          type:"POST",
+          async:false,
+          processData:false,
+              contentType:false,
+              cache:false,
+              data:new FormData($("#file")[0]),
+              success:function(data){
+                _this.form.img = data;
+              }
+        });
+      }
   }
 };
 </script>
 <style scoped>
 .regOA{
     width: 400px;
-    margin: 50px auto;
+    margin: 10px auto;
 }
 
 .avatar-uploader{
@@ -162,5 +242,33 @@ export default {
     border-radius: 50%;
     /* border:1px dashed darkgray; */
     margin: auto;
+}
+#file{
+    width:60px;
+    height: 60px;
+    border-radius: 50%;
+    border:1px dashed darkgray;
+    margin: auto;
+    position: relative;
+    margin: 20px auto;
+}
+#file input{
+  position: absolute;
+  top:0;
+  left:0px;
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  opacity: 0;
+}
+#file img{
+  position: absolute;
+  top:0;
+  left:0px;
+  z-index: 19;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
 }
 </style>

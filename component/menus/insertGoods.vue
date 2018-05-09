@@ -7,7 +7,22 @@
                 <el-breadcrumb-item>新增商品</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-       
+       <form action="" id="file">
+              <img v-for="i in form.imgLogo" :src="i" alt="" @click="deleImg(i)"/>
+              <el-tooltip class="item" effect="dark" content="上传您图片列表" placement="right-start">
+              <div class="fileName">
+                    <input type="file" class="fileInput" multiple  name="sellerlogo"  @change="upload">
+                    <i  class="el-icon-plus avatar-uploader-icon" ></i>
+              </div></el-tooltip>
+          </form>
+          <form action="" id="file1">
+              <img v-for="i in form.imgs" :src="i" alt="" @click="deleImg(i)"/>
+              <el-tooltip class="item" effect="dark" content="上传您商品详情图片" placement="right-start">
+              <div class="fileName">
+                    <input type="file" class="fileInput" multiple  name="sellerlogo"  @change="upload">
+                    <i  class="el-icon-plus avatar-uploader-icon" ></i>
+              </div></el-tooltip>
+          </form>
         <el-form ref="form" :model="form" label-width="80px" class="regOA">
              <el-form-item label="商品名称" prop="title" 
                 :rules="[{ required: true, message: '请输入商品名称', trigger: 'blur' },
@@ -52,6 +67,7 @@
                 <el-button  type="primary" :style="{width:'40%'}" @click="resetForm('form')">重置</el-button>
             </el-form-item>
         </el-form>
+          
     </div>
   
 </template>
@@ -65,7 +81,8 @@ export default {
   },
   data() {
     return {
-        // 表单信息
+        imgLogo:[], 
+       // 表单信息
         form:{
             title:'',
             price_o:'',
@@ -73,7 +90,9 @@ export default {
             address:'',
             delivery:'',
             heavy:'',
-            selectedOptions:[]  
+            selectedOptions:[],
+            imgLogo:[],
+            imgs:[]
         },
         //商品种类
         options: [{
@@ -140,6 +159,61 @@ export default {
         } else {
           callback();
         }
+      },
+    //   //页面显示
+    //   showuserimg() {
+    //     const _this = this;
+	// 			var uploaderInput = $(".fileInput");
+	// 			var imgFile = uploaderInput[0].files[0];
+	// 			var fr = new FileReader();
+	// 			fr.onload = function() {
+    //                 _this.imgLogo.push(fr.result);
+    //                 console.log(_this.imgLogo);
+	// 			};
+	// 			fr.readAsDataURL(imgFile);
+	// 		},
+    //将图片存数据库，得到存数据库的路径
+      upload(){
+        const _this = this;
+         $.ajax({
+          url:"http://localhost:2015/uploadLogo",
+          type:"POST",
+          async:false,
+          processData:false,
+              contentType:false,
+              cache:false,
+              data:new FormData($("#file")[0]),
+              success:function(data){
+                  console.log(data);
+                _this.form.imgLogo.push('http://localhost/shopPc/public/logo/'+data);
+              }
+        });
+      },
+       upload1(){
+        const _this = this;
+         $.ajax({
+          url:"http://localhost:2015/uploadLogo",
+          type:"POST",
+          async:false,
+          processData:false,
+              contentType:false,
+              cache:false,
+              data:new FormData($("#file1")[0]),
+              success:function(data){
+                  console.log(data);
+                _this.form.imgs.push('http://localhost/shopPc/public/logo/'+data);
+              }
+        });
+      },
+      deleImg(src){
+          var srcs =[];
+          for(var i of this.form.imgLogo){
+              if(src!=i){
+                  srcs.push(i);
+              }
+          }
+          this.form.imgLogo = srcs;
+          
       }
      
   }
@@ -148,7 +222,7 @@ export default {
 <style scoped>
 .regOA{
     width: 400px;
-    margin: 50px auto;
+    margin: 10px auto;
 }
 
 .avatar-uploader{
@@ -172,5 +246,63 @@ export default {
     border-radius: 50%;
     /* border:1px dashed darkgray; */
     margin: auto;
+}
+#file{
+    width: 400px;
+    position: relative;
+    margin: 20px auto;
+    overflow: hidden;
+}
+#file .fileName{
+    width:60px;
+    height: 60px;
+    border:1px dashed darkgray;
+    position: relative;
+    float: left;
+}
+#file input{
+    position: absolute;
+  top:0;
+  left:0px;
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  opacity: 0;
+}
+#file img{
+  width: 60px;
+  height: 60px;
+  margin: 0 5px;
+  float: left;
+}
+#file1{
+    width: 400px;
+    position: relative;
+    margin: 20px auto;
+    overflow: hidden;
+}
+#file1 .fileName{
+    width:60px;
+    height: 60px;
+    border:1px dashed darkgray;
+    position: relative;
+    float: left;
+}
+#file1 input{
+    position: absolute;
+  top:0;
+  left:0px;
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  opacity: 0;
+}
+#file1 img{
+  width: 60px;
+  height: 60px;
+  margin: 0 5px;
+  float: left;
 }
 </style>

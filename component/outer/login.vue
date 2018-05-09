@@ -105,6 +105,7 @@
                                     sessionStorage.setItem('type','1');
                                     sessionStorage.setItem('sellerId',data.data.sellerId);
                                     sessionStorage.setItem('logo',data.data.img);
+                                    sessionStorage.setItem('tel',data.data.tel);
                                     _this.$router.push({path:'/menus/index'});
                                 }else{
                                     _this.$message({
@@ -116,7 +117,7 @@
                         })
                     } else {
                         console.log('error submit!!');
-                        return false;
+
                     }
                  });
             },
@@ -128,7 +129,6 @@
                         this.$router.push({path:'/menus/index'});
                     } else {
                         console.log('error submit!!');
-                        return false;
                  }
                 });
             }

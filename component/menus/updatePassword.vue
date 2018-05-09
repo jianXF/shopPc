@@ -8,11 +8,11 @@
         </div>
        
         <el-form ref="form" :model="form" label-width="80px" class="regOA">
-            <el-form-item label="电话"  prop="tel"
+            <!-- <el-form-item label="电话"  prop="tel"
                 :rules="[{ required: true, message: '请输入您的电话', trigger: 'blur' },
                         { validator: validateTel, trigger: 'change' }]">
                 <el-input v-model="form.tel" placeholder="请输入您的电话"></el-input>
-            </el-form-item>
+            </el-form-item> -->
              <el-form-item label="原密码" prop="oldpass"
                 :rules="[{ required: true, message: '请输入您以前的密码', trigger: 'blur' }]">
                 <el-input v-model="form.oldpass" type="password"  placeholder="请输入密码"></el-input>
@@ -58,12 +58,44 @@ export default {
   methods: {
       //确认修改事件
       updateSubmit(formName){
-          this.$refs[formName].validate((valid) => {
+          const _this = this;
+          this.$refs[formName].validate( async(valid) => {
           if (valid) {
-            alert('submit!');
+            await $.ajax({
+                url:"http://localhost:2015/updatePassword/check",
+                type:"POST",
+                data:{
+                    sellerId:sessionStorage.getItem('sellerId'),
+                    oldpass:_this.form.oldpass
+                },
+                success:async function(data){
+                    if(data.code==0){
+                            await $.ajax({
+                                url:"http://localhost:2015/updatePassword/update",
+                                type:"POST",
+                                data:{
+                                    sellerId:sessionStorage.getItem('sellerId'),
+                                    newpass:_this.form.newpass
+                                },
+                                success:function(data){
+                                    _this.$message({
+                                        message: data,
+                                        type: 'success'
+                                    });
+                                     _this.$refs[formName].resetFields();
+                                }
+                            })
+                       
+                    }else{
+                        _this.$message({
+                            message: data.message,
+                            type: 'warning'
+                        });
+                    }
+                }
+            })
           } else {
             console.log('error submit!!');
-            return false;
           }
         });
       },

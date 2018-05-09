@@ -52,7 +52,7 @@ app.post('/reg/checkTel', function(req,res) {
         if(results.length==0){
             res.send('success');
         }else{
-            res.send('该手机号已被注册,请登陆');
+            res.send('该手机号已被注册');
         }
         
     });
@@ -83,17 +83,66 @@ app.post('/login/seller', function(req,res) {
     });
 });
 
-
 //用户注册
 app.post('/reg', function(req,res) {
     res.append("Access-Control-Allow-Origin","*");
     const regTime = timeChange();
     var sql='INSERT INTO seller_info(tel,`password`,img,sellerTitle,`desc`,goodNum,goodsell,regTime,`status`) VALUES '+`
-    ('${req.body.tel}','${req.body.password}','${req.body.img}','${req.body.sellerTitle}','${req.body.desc}',0,0,${regTime},'1')`;
+    ('${req.body.tel}','${req.body.password}','http://localhost/shopPc/public/logo/${req.body.img}','${req.body.sellerTitle}','${req.body.desc}',0,0,${regTime},'1')`;
+    console.log(sql);
     connection.query(sql, function (error, results, fields) {   
         if (error) throw error;
         res.send('success');
     });
+});
+
+//修改用户信息
+app.post('/updateInfo', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+   // update `seller_info` set password`='123456789' where `sellerIid`=7;
+   if(!req.body.img.includes('http:')){
+    req.body.img = 'http://localhost/shopPc/public/logo/'+req.body.img;
+   }
+    var sql='UPDATE seller_info SET `desc` ='+` '${req.body.desc}' ,tel = '${req.body.tel}', sellerTitle = '${req.body.sellerTitle}' ,
+    img = '${req.body.img}' where sellerId=${req.body.sellerId}`;
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+    });
+});
+
+//通过sellerId返回信息
+app.get('/find/sellerId', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql= `SELECT * FROM seller_info where sellerId='${req.query.sellerId}'`;
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send(results[0]);
+    });
+});
+
+//修改密码-核对
+app.post('/updatePassword/check', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql1='SELECT * FROM seller_info where `password` ='+ `${req.body.oldpass} and sellerId='${req.body.sellerId}'`;
+    connection.query(sql1, function (error, results, fields) {   
+        if (error) throw error;
+        if(results.length==0){
+            res.send({code:'-1',message:'原密码输入错误'});
+        }else{
+            res.send({code:'0'});
+        }
+    });
+});
+
+//修改密码
+app.post('/updatePassword/update', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql2='UPDATE seller_info SET `password` ='+` '${req.body.newpass}' where sellerId=${req.body.sellerId}`;
+        connection.query(sql2, function (error, results, fields) {   
+            if (error) throw error;
+            res.send('密码修改成功');
+        });
 });
 app.listen(2015);
 console.log("开启服务器");
