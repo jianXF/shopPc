@@ -75,14 +75,55 @@ app.post('/login/seller', function(req,res) {
             data.code = '-1';
             data.message='用户名或密码错误';
         }else{
+            switch(results[0].status){
+                case 1:
+                        data.code = '-1';
+                        data.message='管理员正在审核该用户信息，待审核通过后才可登录';
+                        break;
+                case 2:
+                        data.code = '0';
+                        data.data = results[0];
+                        data.message="success";
+                        break;
+                case 3:
+                        data.code = '-1';
+                        data.message='审核失败，请联系商城管理员';
+                        break;
+                case 4:
+                        data.code = '-1';
+                        data.message='您已被注销，请联系商城管理员';
+                        break;
+            }
+            
+        }
+        res.send(data);
+    });
+});
+//管理员登录
+app.post('/login/admin', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    const regTime = timeChange();
+    console.log(regTime);
+    var sql= `SELECT * FROM admin_info where userName='${req.body.userName}' and password='${req.body.password}'`;
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        const data={
+            code:'',
+            data:{},
+            message:''
+        }
+        if(results.length == 0){
+            data.code = '-1';
+            data.message='用户名或密码错误';
+        }else{
             data.code = '0';
             data.data = results[0];
             data.message="success";
         }
         res.send(data);
+        
     });
 });
-
 //用户注册
 app.post('/reg', function(req,res) {
     res.append("Access-Control-Allow-Origin","*");
@@ -144,6 +185,200 @@ app.post('/updatePassword/update', function(req,res) {
             res.send('密码修改成功');
         });
 });
+
+//商品分类列表
+app.get('/find/goods_kind', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql=`SELECT * FROM goods_kind`;
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            var option = [];
+            for(var i of results){
+                var opp = {};
+                if(i.oId==0){
+                    opp.value = i.kindId;
+                    opp.label = i.name;
+                    opp.children = [];
+                    for(var j of results){
+                        if(i.kindId==j.oId){
+                            opp.children.push({value:j.kindId,label:j.name});
+                        }
+                        
+                    }
+                    option.push(opp);
+                }
+            }
+           //console.log(option);
+            res.send(option);
+        });
+});
+
+
+//新增商品
+app.post('/insertGoods', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    const regTime = timeChange();
+    var sql='INSERT INTO goods (sellerId,kindId,title,price_o,imgLogo,imgs,stock,sellnum,address,delivery,upTime,heavy,isSell,isBargain) VALUES '+`
+    (${req.body.sellerId},${req.body.kindId},'${req.body.title}','${req.body.price_o}','${req.body.imgLogo}','${req.body.imgs}',${req.body.stock}
+    ,0,'${req.body.address}','${req.body.delivery}','${regTime}',${req.body.heavy},1,0)`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+    });
+});
+
+
+//修改商品
+app.post('/updateGoods', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql=`UPDATE goods SET kindId=${req.body.kindId},title='${req.body.title}',
+    price_o='${req.body.price_o}',imgLogo='${req.body.imgLogo}',imgs='${req.body.imgs}',stock=${req.body.stock},address='${req.body.address}',
+    delivery='${req.body.delivery}',heavy=${req.body.heavy} where goodsId=${req.body.goodsId}`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+    });
+});
+
+//显示所有商品
+app.get('/find/goods', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql=`SELECT * FROM goods`;
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send(results);
+           
+        });
+});
+//通过商品id查找商品
+app.get('/find/goods/goodsId', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql=`SELECT * FROM goods as b,goods_kind as a where goodsId=${req.query.goodsId} and b.kindId=a.kindId`;
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send(results[0]);
+           
+        });
+});
+
+//通过多种信息查找商品and upTime > ${req.query.date1} and upTime < ${req.query.date2}
+app.get('/find/goodss', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var qq =  `select * from  goods as b,goods_kind as a where sellerId=${req.query.sellerId} and b.kindId=a.kindId and `;
+        for(var i in req.query){
+            if(i=='title'){
+                qq+='`title` like '+`'%${req.query.title}%' and `
+            }else if( i=='isSell' || i=='isBargain'){
+                qq+=`${i}=${req.query[i]} and `;
+            }else if(i=='kindId'){
+                qq+=`b.kindId=${req.query[i]} and `;
+            }
+        }
+        qq = qq.substr(0,qq.length-4);
+        // var sql=`SELECT * FROM goods as b,goods_kind as a where sellerId=${req.query.sellerId} and b.kindId=a.kindId and `+'`title`'+
+        // ` like '%${req.query.title}%' and b.kindId= ${req.query.kindId}`;
+        console.log(qq);
+        connection.query(qq, function (error, results, fields) {   
+            if (error) throw error;
+            res.send(results);
+           
+        });
+});
+
+
+
+//商品下架
+app.get('/downGoods', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    const regTime = timeChange();
+    var sql=`UPDATE goods SET isSell=0 ,downTime = '${regTime}' where goodsId=${req.query.goodsId}`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+    });
+});
+
+//商品上架
+app.get('/upGoods', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    const regTime = timeChange();
+    var sql=`UPDATE goods SET isSell=1 ,upTime = '${regTime}' where goodsId=${req.query.goodsId}`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+    });
+});
+
+//设置商品促销
+app.post('/bargainGoods', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    const regTime = timeChange();
+    var sql=`UPDATE goods SET isBargain=1 ,bargaTime = '${regTime}' ,price_n = '${req.body.price_n}' where goodsId=${req.body.goodsId}`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+    });
+});
+
+//结束促销
+app.get('/cancelBargain', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    const regTime = timeChange();
+    var sql=`UPDATE goods SET isBargain=0 ,overTime = '${regTime}' where goodsId=${req.query.goodsId}`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+    });
+});
+
+
+//显示所有电商用户
+app.get('/find/seller', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql=`SELECT * FROM seller_info`;
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send(results);
+           
+        });
+});
+
+//审核电商
+app.get('/seller/check', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql='UPDATE seller_info SET `status`'+` = ${req.query.type} where sellerId = ${req.query.sellerId}` ;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+    });
+});
+
+//通过条件查询电商信息
+app.get('/find/sellers', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql =  `select * from  seller_info where `;
+    for(var i in req.query){
+        if(i=='sellerTitle' || i=='tel'){
+           sql+=`${i} like '%${req.query[i]}%' and `;
+        }else if( i=='status'){
+            sql+=`${i}=${req.query[i]} and `;
+        }
+    }
+    sql = sql.substr(0,sql.length-4);
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send(results);
+           
+        });
+});
+
 app.listen(2015);
 console.log("开启服务器");
 

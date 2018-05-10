@@ -24,14 +24,12 @@
 
                 <el-tab-pane label="管理员" name="second">
                     <el-form ref="form1" :model="form1" label-width="51px">
-                        <el-form-item label="账号" prop="tel"
-                        :rules="[{ required: true, message: '请输入您的账号', trigger: 'blur' },
-                        { validator: validateTel, trigger: 'change' }]">
-                            <el-input v-model="form1.tel"></el-input>
+                        <el-form-item label="账号" prop="userName"
+                        :rules="[{ required: true, message: '请输入您的账号', trigger: 'blur' }]">
+                            <el-input v-model="form1.userName"></el-input>
                         </el-form-item>
                         <el-form-item label="密码" prop='pass'
-                        :rules="[{ required: true, message: '请输入您的密码', trigger: 'blur' },
-                        { validator: validatePass, trigger: 'change' }]">
+                        :rules="[{ required: true, message: '请输入您的密码', trigger: 'blur' }]">
                             <el-input v-model="form1.pass" type="password"></el-input>
                         </el-form-item>
                         <el-form-item>
@@ -60,7 +58,7 @@
                     pass:''
                 },
                 form1:{
-                    tel:'',
+                    userName:'',
                     pass:''
                 },
                 //标签页默认显示
@@ -123,10 +121,30 @@
             },
             //管理员登陆
             loginSubmit1(formName){
-                 this.$refs[formName].validate((valid) => {
+                const _this = this;
+                 this.$refs[formName].validate(async(valid) => {
                     if (valid) {
-                        sessionStorage.setItem('type','2');
-                        this.$router.push({path:'/menus/index'});
+                         await $.ajax({
+                            url:"http://localhost:2015/login/admin",
+                            type:"POST",
+                            data:{
+                                userName:_this.form1.userName,
+                                password:_this.form1.pass
+                            },
+                            success:function(data){
+                                if(data.code==0){
+                                    sessionStorage.setItem('type','2');
+                                    sessionStorage.setItem('adminId',data.data.adminId);
+                                    sessionStorage.setItem('userName',data.data.userName);
+                                    _this.$router.push({path:'/menus/index'});
+                                }else{
+                                    _this.$message({
+                                        message: data.message,
+                                        type: 'warning'
+                                    });
+                                }
+                            }
+                        })
                     } else {
                         console.log('error submit!!');
                  }

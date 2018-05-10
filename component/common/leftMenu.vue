@@ -52,11 +52,6 @@
                                 index:'1-2',
                                 name:'新增商品',
                                 path:'/menus/insertGoods'
-                            },
-                            {
-                                index:'1-3',
-                                name:'修改商品',
-                                path:'/menus/updateGoods'
                             }
                         ]
                     },{

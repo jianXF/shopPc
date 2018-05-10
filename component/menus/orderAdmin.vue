@@ -21,7 +21,7 @@
                 </el-col>
                <el-col :span="6">
                     <el-form-item label="订单状态:">
-                        <el-select v-model="form.kindId" placeholder="请选择状态">
+                        <el-select v-model="form.kindId" placeholder="请选择状态" clearable>
                         <el-option label="待付款" value="1"></el-option>
                         <el-option label="待发货" value="2"></el-option>
                         <el-option label="待评价" value="3"></el-option>

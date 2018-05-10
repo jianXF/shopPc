@@ -30,7 +30,7 @@
                 <el-input v-model="form.goodsId" disabled></el-input>
             </el-form-item>
              <el-form-item label="订单状态:" prop="kindId" >
-                        <el-select v-model="form.kindId" disabled>
+                        <el-select v-model="form.kindId" disabled >
                         <el-option label="待付款" value="1"></el-option>
                         <el-option label="待发货" value="2"></el-option>
                         <el-option label="待评价" value="3"></el-option>

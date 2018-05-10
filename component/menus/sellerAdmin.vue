@@ -21,7 +21,7 @@
                 </el-col>
                 <el-col :span="6">
                     <el-form-item label="是否审核:">
-                        <el-select v-model="form.status" placeholder="请选择状态">
+                        <el-select v-model="form.status" placeholder="请选择状态" clearable >
                         <el-option label="待审核" value="1"></el-option>
                         <el-option label="审核成功" value="2"></el-option>
                         <el-option label="审核失败" value="3"></el-option>
@@ -42,7 +42,7 @@
             :style="{width: '90%',margin:'auto'}">
             <el-table-column
                 fixed
-                prop="sellerIid"
+                prop="sellerId"
                 label="商家编号"
                 width="80">
             </el-table-column>
@@ -94,7 +94,7 @@
                 >注销</el-button>
                 <el-button type="text" size="small" @click="shelf(scope.row)"
                     :style="{display:scope.row.status==4?'block':'none'}"
-                >上架</el-button>
+                >重新通过</el-button>
             </template>
             </el-table-column>
         </el-table>
@@ -104,7 +104,7 @@
 </template>
 
 <script>
-  
+  import $ from 'jquery';
     export default{
         components:{
            
@@ -116,103 +116,191 @@
                     sellerTel: '',
                     status: ''
                 },
-                tableData: [{
-                    sellerIid: '123234',
-                    sellerTitle: '悦诗风吟',
-                    tel: '149370984750',
-                    goodNum:'211',
-                    regTime: '20150406',
-                    status:1
-                    
-                },
-                {
-                    sellerIid: '1234',
-                    sellerTitle: '悦诗风吟',
-                    tel: '149370984750',
-                    goodNum:'211',
-                    regTime: '20150406',
-                    status:2
-                    
-                },{
-                    sellerIid: '342',
-                    sellerTitle: '悦诗风吟',
-                    tel: '149370984750',
-                    goodNum:'211',
-                    regTime: '20150406',
-                    status:3
-                    
-                },{
-                    sellerIid: '2234',
-                    sellerTitle: '悦诗风吟',
-                    tel: '149370984750',
-                    goodNum:'211',
-                    regTime: '20150406',
-                    status:4
-                    
-                }]
+                tableData: []
             }
         },
+        async mounted(){
+            //商品列表加载
+            const _this = this;
+            await $.ajax({
+                url:"http://localhost:2015/find/seller",
+                type:"get",
+                data:{
+                },
+                success:function(data){
+                    _this.tableData = data;
+                }
+                  
+            })
+        },
         methods:{
-            findSubmit() {
-                console.log(this.form.date1);
+            async findSubmit() {
+                const _this = this;
+                console.log(this.form);
+                await $.ajax({
+                url:"http://localhost:2015/find/sellers",
+                type:"get",
+                data:{
+                    sellerTitle:_this.form.sellerTitle?_this.form.sellerTitle:undefined,
+                    tel:_this.form.sellerTel?_this.form.sellerTel:undefined,
+                    status: _this.form.status==''?undefined:_this.form.status,
+                },
+                success:function(data){
+                    _this.tableData = data;
+                }
+                })
 
             },
             //审核成功
             checkSuccess(obj){
+                const _this= this;
+                console.log(obj);
                 this.$confirm('确定将该商户审核通过', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
-                }).then(() => {
-                    this.$message({
-                        type: 'success',
-                        message: '该用户已通过审核'
-                });
+                }).then(async() => {
+                    await $.ajax({
+                        url:"http://localhost:2015/seller/check",
+                        type:"get",
+                        data:{
+                            sellerId:obj.sellerId,
+                            type:2
+                        },
+                        success:function(data){
+                            if(data=='success'){
+                                _this.$message({
+                                    type: 'success',
+                                    message: '该用户已通过审核'
+                                });
+                            }   
+                        }  
+                    })
+                    await $.ajax({
+                        url:"http://localhost:2015/find/seller",
+                        type:"get",
+                        data:{
+                        },
+                        success:function(data){
+                            _this.tableData = data;
+                        }
+                        
+                    })
+                    
                 }).catch(() => {
                              
                 });
             },
             //审核失败
             checkFail(obj){
+                const _this= this;
                  this.$confirm('确定将该商户审核未通过', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
-                }).then(() => {
-                    this.$message({
-                        type: 'success',
-                        message: '该用户未通过审核'
-                });
+                }).then(async() => {
+                    await $.ajax({
+                        url:"http://localhost:2015/seller/check",
+                        type:"get",
+                        data:{
+                            sellerId:obj.sellerId,
+                            type:3
+                        },
+                        success:function(data){
+                            if(data=='success'){
+                                _this.$message({
+                                    type: 'success',
+                                    message: '该用户未通过审核'
+                                });
+                            }   
+                        }  
+                    })
+                    await $.ajax({
+                        url:"http://localhost:2015/find/seller",
+                        type:"get",
+                        data:{
+                        },
+                        success:function(data){
+                            _this.tableData = data;
+                        }
+                        
+                    })
                 }).catch(() => {
                              
                 });
             },
             //商户注销
             cancelSeller(obj){
+                const _this= this;
                  this.$confirm('确定将该商户注销', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
-                }).then(() => {
-                    this.$message({
-                        type: 'success',
-                        message: '该商户已注消'
-                });
+                }).then(async() => {
+                    await $.ajax({
+                        url:"http://localhost:2015/seller/check",
+                        type:"get",
+                        data:{
+                            sellerId:obj.sellerId,
+                            type:4
+                        },
+                        success:function(data){
+                            if(data=='success'){
+                                _this.$message({
+                                    type: 'success',
+                                    message: '该商户已被成功注消'
+                                });
+                            }   
+                        }  
+                    })
+                    await $.ajax({
+                        url:"http://localhost:2015/find/seller",
+                        type:"get",
+                        data:{
+                        },
+                        success:function(data){
+                            _this.tableData = data;
+                        }
+                        
+                    })
                 }).catch(() => {
                              
                 });
             },
             //商户上架
             shelf(obj){
+                const _this= this;
                  this.$confirm('确定该商户再次正常使用', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
-                }).then(() => {
-                    this.$message({
-                        type: 'success',
-                        message: '该商户已恢复所有功能'
-                });
+                }).then(async() => {
+                    await $.ajax({
+                        url:"http://localhost:2015/seller/check",
+                        type:"get",
+                        data:{
+                            sellerId:obj.sellerId,
+                            type:1
+                        },
+                        success:function(data){
+                            if(data=='success'){
+                                _this.$message({
+                                    type: 'success',
+                                    message: '该商户已恢复所有功能'
+                                });
+                            }   
+                        }  
+                    })
+                    await $.ajax({
+                        url:"http://localhost:2015/find/seller",
+                        type:"get",
+                        data:{
+                        },
+                        success:function(data){
+                            _this.tableData = data;
+                        }
+                        
+                    })
                 }).catch(() => {
                              
                 });

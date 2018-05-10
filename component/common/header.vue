@@ -85,6 +85,7 @@ import src from "../../img/user.jpg";
             if(type=='2'){
                 this.menus = this.menus1;
                 this.type='2';
+                this.user.title = sessionStorage.getItem('userName');
                 
             }else{
                 this.type='1';
