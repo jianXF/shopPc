@@ -66,11 +66,6 @@
                                 path:'/menus/orderAdmin'
                             },
                             {
-                                index:'2-2',
-                                name:'订单详情',
-                                path:'/menus/orderDetail'
-                            },
-                            {
                                 index:'2-3',
                                 name:'评论管理',
                                 path:'/menus/conment'

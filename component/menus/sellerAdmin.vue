@@ -50,6 +50,9 @@
             prop="sellerTitle"
             label="商家名称"
             width="150">
+                <template slot-scope="scope">
+                    <a :href="'#/menus/findSellerInfo?sellerId='+scope.row.sellerId" v-text="scope.row.sellerTitle">待审核 </a>
+                </template>
             </el-table-column>
             <el-table-column
             label="商家手机号"

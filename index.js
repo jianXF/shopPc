@@ -30,7 +30,7 @@ import updateGoods from "./component/menus/updateGoods.vue";
 import userAdmin from "./component/menus/userAdmin.vue";
 import updateInfo from "./component/menus/updateInfo.vue";
 import updatePassword from "./component/menus/updatePassword.vue";
-
+import findSellerInfo from "./component/menus/findSellerInfo.vue";
 
 //状态管理
 import Vuex from 'vuex';
@@ -105,6 +105,10 @@ var router = new VueRouter({
         {
             path: 'updatePassword',
             component: updatePassword
+        },
+        {
+            path:'findSellerInfo',
+            component:findSellerInfo
         }
     ]
     }]

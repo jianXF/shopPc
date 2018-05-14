@@ -11,21 +11,22 @@
            <el-row :gutter="10">
                <el-col :span="6">
                     <el-form-item label="订单编号:">
-                        <el-input v-model="form.sellerTitle" placeholder="请输入订单编号"></el-input>
+                        <el-input v-model="form.orderId" placeholder="请输入订单编号"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
                     <el-form-item label="购买人电话:">
-                        <el-input v-model="form.sellerTitle" placeholder="请输入收货电话"></el-input>
+                        <el-input v-model="form.tel" placeholder="请输入收货电话"></el-input>
                     </el-form-item>
                 </el-col>
                <el-col :span="6">
                     <el-form-item label="订单状态:">
-                        <el-select v-model="form.kindId" placeholder="请选择状态" clearable>
+                        <el-select v-model="form.status" placeholder="请选择状态" clearable>
                         <el-option label="待付款" value="1"></el-option>
                         <el-option label="待发货" value="2"></el-option>
-                        <el-option label="待评价" value="3"></el-option>
-                        <el-option label="完成" value="4"></el-option>
+                        <el-option label="待收货" value="3"></el-option>
+                        <el-option label="待评价" value="4"></el-option>
+                        <el-option label="完成" value="5"></el-option>
                         </el-select>
                     </el-form-item>
                 </el-col>
@@ -47,10 +48,13 @@
                 width="130">
             </el-table-column>
             <el-table-column
-            prop="title"
             label="商品名称"
-            width="150">
+            width="150"> 
+            <template slot-scope="scope">
+                <a class="goods" v-text="scope.row.title" :href="'#/menus/updateGoods?goodsId='+scope.row.goodsId"></a>
+            </template>
             </el-table-column>
+            
             <el-table-column
             label="购买金额"
             prop="goodsPrice"
@@ -72,8 +76,9 @@
                 <template slot-scope="scope">
                     <span :style="{display:scope.row.status==1?'block':'none',color:'green'}">待付款 </span>
                     <span :style="{display:scope.row.status==2?'block':'none',color:'red'}">待发货 </span>
-                    <span :style="{display:scope.row.status==3?'block':'none',color:''}">待评价 </span>
-                    <span :style="{display:scope.row.status==4?'block':'none',color:'#6060bd'}">完成 </span>
+                    <span :style="{display:scope.row.status==3?'block':'none',color:''}">待收货 </span>
+                    <span :style="{display:scope.row.status==4?'block':'none',color:''}">待评价 </span>
+                    <span :style="{display:scope.row.status==5?'block':'none',color:'#6060bd'}">完成 </span>
                 </template>
             </el-table-column>
             <el-table-column
@@ -82,7 +87,7 @@
             >
             <template slot-scope="scope">
                 <el-button @click="handleClick(scope.row)" type="text" size="small">编辑</el-button>
-                <el-button type="text" size="small" @click="dialogFormVisible = true">发货</el-button>
+                <el-button type="text" size="small" v-if="scope.row.status==2" @click=" dialogshow(scope.row)">发货</el-button>
             </template>
             </el-table-column>
         </el-table>
@@ -109,7 +114,7 @@
 </template>
 
 <script>
-  
+  import $ from "jquery";
     export default{
         components:{
            
@@ -118,12 +123,9 @@
             return {
                 formLabelWidth:'80px',
                 form: {
-                    sellerTitle: '',
-                    kindId: '',
-                    date1: '',
-                    date2: '',
-                    isSell: false,
-                    isBargain:false
+                   orderId:'',
+                   tel:'',
+                   status:''
                 },
                 //发货弹出框的表单
                 deliveryForm:{
@@ -131,65 +133,87 @@
                     deliveryId:''
                 },
                 dialogFormVisible:false,
-                tableData: [{
-                    orderId: '1234',
-                    title: '悦诗风吟',
-                    goodsPrice: '1423',
-                    price_n:'211',
-                    goodsNum: '233',
-                    tel: '1948934534',
-                    status:'1'
-                    
-                },{
-                    orderId: '12334',
-                    title: '悦诗风吟',
-                    goodsPrice: '1423',
-                    price_n:'211',
-                    goodsNum: '233',
-                    tel: '1948934534',
-                    status:'2'
-                    
-                },{
-                    orderId: '12234',
-                    title: '悦诗风吟',
-                    goodsPrice: '1423',
-                    price_n:'211',
-                    goodsNum: '233',
-                    tel: '1948934534',
-                    status:'3'
-                    
-                },{
-                    orderId: '12434',
-                    title: '悦诗风吟',
-                    goodsPrice: '1423',
-                    price_n:'211',
-                    goodsNum: '233',
-                    tel: '1948934534',
-                    status:'4'
-                    
-                }]
+                tableData: [],
+                selectId:''
             }
+        },
+        async mounted(){
+            const _this = this;
+            await $.ajax({
+                    url:"http://localhost:2015/find/orderAll",
+                    type:"GET",
+                    data:{
+                        sellerId:sessionStorage.getItem("sellerId")
+                    },
+                    success:function(data){
+                        _this.tableData = data;
+                        console.log( _this.tableData);
+                    }
+            })
         },
         methods:{
             //查询事件
-            findSubmit() {
-                console.log('submit!');
+            async findSubmit() {
+                const _this = this;
+                await $.ajax({
+                    url:"http://localhost:2015/find/orders",
+                    type:"get",
+                    data:{
+                        sellerId:sessionStorage.getItem("sellerId"),
+                        orderId:_this.form.orderId?_this.form.orderId:undefined,
+                        tel:_this.form.tel?_this.form.tel:undefined,
+                        status:_this.form.status?_this.form.status:undefined
+                    },
+                    success:function(data){
+                        _this.tableData = data;
+                    }
+                })
             },
             //点击查看事件
             handleClick(obj){
-
+                this.$router.push({path:'/menus/orderDetail',query:{orderId:obj.orderId}})
             },
             //发货
             sendGoods(obj){
 
             },
+            //发货
             sendSubmit(formName){
-                 this.$refs[formName].validate((valid) => {
+                const _this = this;
+                 this.$refs[formName].validate(async(valid) => {
                 if (valid) {
+                     await $.ajax({
+                        url:"http://localhost:2015/orders/send",
+                        type:"post",
+                        data:{
+                            orderId:_this.selectId,
+                            deliveryName:_this.deliveryForm.deliveryName,
+                            deliveryId:_this.deliveryForm.deliveryId
+                        },
+                        success:function(data){
+                            if(data=='success'){
+                                _this.$message({
+                                    message: '发货成功',
+                                    type: 'success'
+                                });
+                            }
+                        }
+                    })
+
                     this.dialogFormVisible=false;
+                    await $.ajax({
+                            url:"http://localhost:2015/find/orderAll",
+                            type:"GET",
+                            data:{
+                                sellerId:sessionStorage.getItem("sellerId")
+                            },
+                            success:function(data){
+                                _this.tableData = data;
+                            }
+                    })
                 } else {
                     
-                    return false;
+                    return;
                 }
                 });
             },
@@ -200,6 +224,13 @@
                 } else {
                 callback();
                 }
+            },
+            //显示发货弹框
+            dialogshow(obj){
+                this.deliveryForm.deliveryName='';
+                this.deliveryForm.deliveryId="";
+                this.dialogFormVisible=true;
+                this.selectId=obj.orderId;
             }
         }
     }
@@ -212,5 +243,9 @@
 }
 .dialog .el-input{
     width: 80%;
+}
+.goods{
+    color:#409EFF;
+    text-decoration: underline;
 }
 </style>

@@ -7,63 +7,42 @@
                 <el-breadcrumb-item>订单详情</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-       <el-form ref="findform" :model="form" label-width="80px" class="findForm">
-           <el-row type="flex" class="row-bg" justify="center">
-               <el-col :span="12">
-                    <el-form-item label="订单编号" prop="orderId" 
-                        :rules="[{ required: false, message: '请输入商品编号', trigger: 'blur' },
-                                { type: 'number', message: '输入格式不正确，请输入数字'}]">
-                        <el-input v-model.number="findform.orderId"   placeholder="请输入商品编号"></el-input>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="1">
-                    <el-form-item>
-                        <el-button  type="primary" @click="findSubmit('findform')">查询</el-button>
-                    </el-form-item>
-                </el-col>
-           </el-row>
-        </el-form>
-
-
+        <el-steps :active="Number(form.status)" align-center :style="{width:'60%',margin:'30px auto'}">
+            <el-step title="下单" :description="form.orderTime?form.orderTime.substr(0,8):''"></el-step>
+            <el-step title="付款" :description="form.buyTime?form.buyTime.substr(0,8):''"></el-step>
+            <el-step title="发货" :description="form.sendTime?form.sendTime.substr(0,8):''"></el-step>
+            <el-step title="收货" :description="form.getTime?form.getTime.substr(0,8):''"></el-step>
+            <el-step title="评价" :description="form.evaTime?form.evaTime.substr(0,8):''"></el-step>
+            <el-step title="完成" ></el-step>
+        </el-steps>
         <el-form ref="form" :model="form" label-width="80px" class="regOA">
              <el-form-item label="商品编号" prop="goodsId" >
                 <el-input v-model="form.goodsId" disabled></el-input>
             </el-form-item>
-             <el-form-item label="订单状态:" prop="kindId" >
-                        <el-select v-model="form.kindId" disabled >
-                        <el-option label="待付款" value="1"></el-option>
-                        <el-option label="待发货" value="2"></el-option>
-                        <el-option label="待评价" value="3"></el-option>
-                        <el-option label="完成" value="4"></el-option>
-                        </el-select>
-                    </el-form-item>
-             <el-form-item label="成交数量" prop="goodsNum" >
+             <el-form-item label="购买数量" prop="goodsNum" >
                 <el-input v-model.number="form.goodsNum" disabled></el-input>
             </el-form-item>
-            <el-form-item label="成交金额" prop="goodsPrice">
+            <el-form-item label="交易金额" prop="goodsPrice">
                 <el-input v-model="form.goodsPrice"  disabled></el-input>
             </el-form-item>
-            <el-form-item label="下单时间" prop="orderTime" >
-                 <el-date-picker format="yyyyMMdd" disabled value-format="yyyyMMdd" type="date" placeholder="选择日期" v-model="form.orderTime" style="width: 100%;"></el-date-picker>
-            </el-form-item>
-            
             <el-form-item label="收货姓名" prop="addressName" 
              :rules="[{ required: true, message: '请输入收货姓名', trigger: 'blur' },
                 { validator: validateName, trigger: 'change' }]">
-                <el-input v-model.number="form.addressName"   placeholder="请输入收货姓名"></el-input>
+                <el-input v-model.number="form.addressName" :disabled="form.status>2?true:false"   placeholder="请输入收货姓名"></el-input>
             </el-form-item>
             <el-form-item label="收货电话" prop="addressTel" 
                 :rules="[{ required: true, message: '请输入收货电话', trigger: 'blur' },
                     { validator: validateTel, trigger: 'change' }]">
-                <el-input v-model.number="form.addressTel"   placeholder="请输入收货电话"></el-input>
+                <el-input v-model.number="form.addressTel"  :disabled="form.status>2?true:false"  placeholder="请输入收货电话"></el-input>
             </el-form-item> 
             <el-form-item label="收货地址" prop="address" 
             :rules="[{ required: true, message: '请输入收货地址', trigger: 'blur' },
                 { validator: validateAddress, trigger: 'change' }]">
-                <el-input type="textarea" v-model.number="form.address" :rows="4"  placeholder="请输入收货地址"></el-input>
+                <el-input type="textarea" v-model.number="form.address" :disabled="form.status>2?true:false" :rows="4"  placeholder="请输入收货地址"></el-input>
             </el-form-item>
             <el-form-item>
-                <el-button  type="primary" :style="{width:'60%',margin:'auto'}" @click="updateSubmit('form')">修改</el-button>
+                <el-button  type="primary" :style="{width:'60%',margin:'auto'}" :disabled="form.status>2?true:false" 
+                @click="updateSubmit('form')">修改</el-button>
             </el-form-item>
         </el-form>
     </div>
@@ -79,14 +58,10 @@ export default {
   },
   data() {
     return {
-        //查询表单信息
-        findform:{
-            orderId:''
-        },
         // 添加商品表单信息
         form:{
             goodsId:'',
-            kindId:'1',
+            status:'1',
             goodsNum:'',
             goodsPrice:'',
             orderTime:'20140502',
@@ -98,15 +73,57 @@ export default {
        
     };
   },
+  async mounted(){
+       const _this = this;
+       var orderId = this.$router.history.current.query.orderId;
+                await $.ajax({
+                url:"http://localhost:2015/find/orderId",
+                type:"get",
+                data:{
+                    orderId:orderId
+                },
+                success:function(data){
+                    _this.form = data;
+                    _this.form.status = _this.form.status+'';
+                }
+                })
+  },
   methods: {
-      findSubmit(formName){
-
-      },
       //确认添加事件
       updateSubmit(formName){
-          this.$refs[formName].validate((valid) => {
+          var orderId = this.$router.history.current.query.orderId;
+          const _this = this;
+          this.$refs[formName].validate(async(valid) => {
           if (valid) {
-            alert('submit!');
+            await $.ajax({
+                url:"http://localhost:2015/order/update",
+                type:"POST",
+                data:{
+                    orderId:orderId,
+                    addressName:_this.form.addressName,
+                    addressTel:_this.form.addressTel,
+                    address:_this.form.address 
+                },
+                success:function(data){
+                    if(data="success"){
+                        _this.$message({
+                            message: '修改该订单收货信息成功',
+                            type: 'success'
+                          });
+                    }
+                }
+            })
+            await $.ajax({
+                url:"http://localhost:2015/find/orderId",
+                type:"get",
+                data:{
+                    orderId:orderId
+                },
+                success:function(data){
+                    _this.form = data;
+                    _this.form.status = _this.form.status+'';
+                }
+                })
           } else {
             console.log('error submit!!');
             return false;

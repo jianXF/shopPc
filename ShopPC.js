@@ -212,12 +212,64 @@ app.get('/find/goods_kind', function(req,res) {
             res.send(option);
         });
 });
+//获取商品总类
+app.get('/findAll/goods_kind', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql=`SELECT * FROM goods_kind where oId=0`;
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send(results);
+        });
+});
+//通过总类或许子类
+app.get('/findChild/goods_kind', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql=`SELECT * FROM goods_kind where oId=${req.query.kindId}`;
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send(results);
+        });
+});
+//修改商品子类型goods_kind/update
+app.post('/goods_kind/update', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql=`update goods_kind set name='${req.body.name}' where kindId=${req.body.kindId}`;
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send('success');
+        });
+});
+
+//新增商品类型
+app.post('/goods_kind/insert', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql='INSERT INTO goods_kind(oId , `name` )'+` VALUES (${req.body.oId} , '${req.body.name}')`;
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send('success');
+        });
+});
+
+//删除商品类型
+app.post('/goods_kind/delete', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql=`delete from goods_kind where kindId = ${req.body.kindId}`;
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send('success');
+        });
+});
 
 
 //新增商品
 app.post('/insertGoods', function(req,res) {
     res.append("Access-Control-Allow-Origin","*");
     const regTime = timeChange();
+    var sql2=`UPDATE seller_info SET goodNum =goodNum+1 where sellerId=${req.body.sellerId}`;
+        connection.query(sql2, function (error, results, fields) {   
+            if (error) throw error;
+        });
+
     var sql='INSERT INTO goods (sellerId,kindId,title,price_o,imgLogo,imgs,stock,sellnum,address,delivery,upTime,heavy,isSell,isBargain) VALUES '+`
     (${req.body.sellerId},${req.body.kindId},'${req.body.title}','${req.body.price_o}','${req.body.imgLogo}','${req.body.imgs}',${req.body.stock}
     ,0,'${req.body.address}','${req.body.delivery}','${regTime}',${req.body.heavy},1,0)`;
@@ -245,7 +297,7 @@ app.post('/updateGoods', function(req,res) {
 //显示所有商品
 app.get('/find/goods', function(req,res) {
     res.append("Access-Control-Allow-Origin","*");
-        var sql=`SELECT * FROM goods`;
+        var sql=`SELECT * FROM goods where sellerId=${req.query.sellerId}`;
         connection.query(sql, function (error, results, fields) {   
             if (error) throw error;
             res.send(results);
@@ -379,13 +431,125 @@ app.get('/find/sellers', function(req,res) {
         });
 });
 
+//显示所有用户
+app.get('/find/user', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql=`SELECT * FROM user_info`;
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send(results);
+           
+        });
+});
+//通过条件查询用户
+app.get('/find/users', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql =  `select * from user_info where `;
+    for(var i in req.query){
+        if(i=='regTime'){
+           sql+=`${i} like '${req.query[i]}%' and `;
+        }else if( i=='tel'){
+            sql+=`${i} like '${req.query[i]}%' and `;
+        }
+    }
+    sql = sql.substr(0,sql.length-4);
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send(results);
+           
+        });
+});
+
+//修改用户密码
+app.post('/update/userPass', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+        var sql2='UPDATE user_info SET `password` ='+` '${req.body.password}' where userId=${req.body.userId}`;
+        connection.query(sql2, function (error, results, fields) {   
+            if (error) throw error;
+            res.send('密码修改成功');
+        });
+});
+
+//查询订单
+app.get('/find/orders', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql='SELECT a.*,c.goodsId,c.title,b.tel FROM `order` as a ,user_info as b,goods as c where a.sellerId='+req.query.sellerId+' and c.goodsId=a.goodsId and b.userId = a.userId and ';
+        for(var i in req.query){
+            if(i=='status'){
+               sql+=`a.${i} = ${req.query[i]} and `;
+            }else if( i=='tel'){
+                sql+=`b.${i} like '%${req.query[i]}%' and `;
+            }else if(i=='orderId'){
+                sql+=`a.${i} like '%${req.query[i]}%' and `;
+            }
+        }
+        sql = sql.substr(0,sql.length-4);
+        sql +=' order by a.orderTime DESC';
+        console.log(sql);
+    connection.query(sql, function (error, results, fields) {
+        if (error) throw error;
+        res.send(results);
+    
+    });
+});
+//所有订单
+app.get('/find/orderAll', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql='SELECT a.*,c.goodsId,c.title,b.tel FROM `order` as a ,user_info as b,goods as c where a.sellerId'+
+        ` = ${req.query.sellerId}  and c.goodsId=a.goodsId and b.userId = a.userId order by a.orderTime DESC`;
+    connection.query(sql, function (error, results, fields) {
+        if (error) throw error;
+        res.send(results);
+    
+    });
+});
+
+//通过id查询订单详情
+app.get('/find/orderId', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql='SELECT * FROM `order` where orderId '+`= ${req.query.orderId} `;
+    connection.query(sql, function (error, results, fields) {
+        if (error) throw error;
+        res.send(results[0]);
+    
+    });
+});
+
+//修改订单收货地址
+app.post('/order/update', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql='update `order` set address ='+` '${req.body.address}', addressName = '${req.body.addressName}',
+    addressTel = '${req.body.addressTel}'   where orderId = ${req.body.orderId}`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {
+        if (error) throw error;
+        res.send('success');
+    
+    });
+});
+
+
+//添加订单的快递单号
+app.post('/orders/send', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    const regTime = timeChange();
+    var sql='update `order` set `status` = 3'+`,sendTime = ${regTime}, deliveryName = '${req.body.deliveryName}', deliveryId = '${req.body.deliveryId}' 
+     where orderId = ${req.body.orderId}`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {
+        if (error) throw error;
+        res.send('success');
+    
+    });
+});
+
 app.listen(2015);
 console.log("开启服务器");
 
 //时间函数
 function timeChange(){ 
     var time = new Date();
-    return ""+time.getFullYear()+stringNum(time.getMonth())+stringNum(time.getDate())+stringNum(time.getHours())+stringNum(time.getMinutes())+stringNum(time.getSeconds())+"";
+    return ""+time.getFullYear()+stringNum(time.getMonth()+1)+stringNum(time.getDate())+stringNum(time.getHours())+stringNum(time.getMinutes())+stringNum(time.getSeconds())+"";
 }
 function stringNum(ti){
     if(ti<10){
