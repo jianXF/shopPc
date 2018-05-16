@@ -9,28 +9,31 @@
         </div>
        <el-form ref="form" :model="form" label-width="90px" class="goodsAdminOA">
            <el-row :gutter="10">
-               <el-col :span="6">
-                    <el-form-item label="商品编号:">
-                        <el-input v-model="form.goodsId" placeholder="请输入商品编号"></el-input>
+               <el-col :span="5">
+                    <el-form-item label="商品名称:">
+                        <el-input v-model="form.title" placeholder="请输入商品名称" clearable></el-input>
                     </el-form-item>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="5">
                     <el-form-item label="评论时间:">
                         <el-date-picker format="yyyyMMdd" value-format="yyyyMMdd" type="date" placeholder="选择日期" v-model="form.evaTime" style="width: 100%;"></el-date-picker>
                     </el-form-item>
                 </el-col>
                 <el-col :span="5">
                 <el-form-item label="评价等级:">
-                        <el-select v-model="form.evaType" placeholder="请选择评价等级">
+                        <el-select v-model="form.evaType" placeholder="请选择评价等级" clearable>
                         <el-option label="好评" value="1"></el-option>
                         <el-option label="中评" value="2"></el-option>
                         <el-option label="差评" value="3"></el-option>
                         </el-select>
                     </el-form-item>
                 </el-col>
-               <el-col :span="2">
-                    <el-form-item label="是否回复:">
-                       <el-switch v-model="form.isReply"></el-switch>
+               <el-col :span="5">
+                    <el-form-item label="回复状态:">
+                        <el-select v-model="form.isReply" placeholder="请选择回复状态" clearable>
+                        <el-option label="未回复" value="0"></el-option>
+                        <el-option label="已回复" value="1"></el-option>
+                        </el-select>
                     </el-form-item>
                 </el-col>
                <el-col :span="2">
@@ -48,18 +51,25 @@
                 fixed
                 prop="evaId"
                 label="评价编号"
+                sortable
                 width="120">
             </el-table-column>
             <el-table-column
-            prop="goodsId"
-            label="商品编号"
+           
+            label="商品名称"
             width="120">
+                <template slot-scope="scope">
+                    <a class="goods"  v-text="scope.row.title" :href="'#/menus/updateGoods?goodsId='+scope.row.goodsId"></a>
+                </template>
             </el-table-column>
             
             <el-table-column
-            prop="evaTime"
             label="评价时间"
-            width="100">
+            sortable
+            width="105">
+                <template slot-scope="scope">
+                    <span v-text="scope.row.evaTime.substr(0,8)"></span>
+                </template>
             </el-table-column>
             <el-table-column
             prop="evaType"
@@ -89,9 +99,9 @@
 
         <el-dialog title="评价回复" :visible.sync="dialogFormVisible" class="dialog">
             <el-form :model="deliveryForm" ref="deliveryForm"> 
-                <el-form-item label="回复日期" :label-width="formLabelWidth" prop='repalyTime' :style="{display:deliveryForm.isReply?'block':'none'}">
+                <el-form-item label="回复日期" :label-width="formLabelWidth" prop='replyTime' :style="{display:deliveryForm.isReply?'block':'none'}">
                       <el-date-picker format="yyyyMMdd" value-format="yyyyMMdd" type="date"
-                        v-model="deliveryForm.repalyTime" style="width: 80%;"></el-date-picker>
+                        v-model="deliveryForm.replyTime" style="width: 80%;"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="回复内容" :label-width="formLabelWidth" prop='repalyCon'
                     :rules="[{ required: true, message: '请输入快递公司名称', trigger: 'blur' },
@@ -110,7 +120,7 @@
 </template>
 
 <script>
-  
+  import $ from "jquery";
     export default{
         components:{
            
@@ -119,50 +129,98 @@
             return {
                 formLabelWidth:'80px',
                 form: {
-                    goodsId: '',
+                    title: '',
                     evaType:'',
                     evaTime: '',
-                    isReply: false
+                    isReply: ''
                 },
                 //发货弹出框的表单
                 deliveryForm:{
                     repalyCon:'',
                     replyTime:'',
-                    isReply:false
+                    isReply:0,
+                    evaId:''
                 },
                 dialogFormVisible:false,
-                tableData: [{
-                    evaId: '1234',
-                    goodsId: '1343225322',
-                    evaTime: '20150302',
-                    evaType:'1',
-                    content: '接待来访垃圾收到了',
-                    isReply:false
-                },{
-                    evaId: '1434',
-                    goodsId: '1343225322',
-                    evaTime: '20150302',
-                    evaType:'1',
-                    content: '接待来访垃圾收到了',
-                    isReply:true
-                }]
+                tableData: []
             }
+        },
+        async mounted(){
+            const _this = this;
+            await $.ajax({
+                    url:"http://localhost:2015/find/evaluateAll",
+                    type:"GET",
+                    data:{
+                        sellerId:sessionStorage.getItem("sellerId")
+                    },
+                    success:function(data){
+                        _this.tableData = data;
+                        console.log( _this.tableData);
+                    }
+            })
         },
         methods:{
             //查询事件
-            findSubmit() {
+            async findSubmit() {
                 console.log('submit!');
+                const _this= this;
+                await $.ajax({
+                    url:"http://localhost:2015/find/evaluates",
+                    type:"GET",
+                    data:{
+                        sellerId:sessionStorage.getItem("sellerId"),
+                        title:_this.form.title?_this.form.title:undefined,
+                        evaType:_this.form.evaType?_this.form.evaType:undefined,
+                        evaTime: _this.form.evaTime?_this.form.evaTime:undefined,
+                        isReply: _this.form.isReply?_this.form.isReply:undefined
+
+                    },
+                    success:function(data){
+                        _this.tableData = data;
+                    }
+            })
+
             },
             //点击回复事件
-            handleClick(obj){
+             handleClick(obj){
+                
                 this.dialogFormVisible=true;
-                this.deliveryForm.isReply=obj.isReply;
+                this.deliveryForm.evaId = obj.evaId;
+                if(obj.isReply){
+                    this.deliveryForm.isReply=obj.isReply;
+                    this.deliveryForm.repalyCon=obj.repalyCon;
+                    this.deliveryForm.replyTime=obj.replyTime.substr(0,8);
+                    console.log()
+                }else{
+                    this.deliveryForm.isReply=obj.isReply;
+                    this.deliveryForm.repalyCon="";
+                    this.deliveryForm.replyTime="";
+                }
+                
+                
             },
             //回复
             sendSubmit(formName){
-                 this.$refs[formName].validate((valid) => {
+                 this.$refs[formName].validate(async(valid) => {
                 if (valid) {
-                    this.dialogFormVisible=false;
+                    const _this =this;
+                    await $.ajax({
+                    url:"http://localhost:2015/evaluate/repaly",
+                    type:"POST",
+                    data:{
+                        evaId:_this.deliveryForm.evaId,
+                        repalyCon:_this.deliveryForm.repalyCon
+                    },
+                    success:function(data){
+                        if(data=="success"){
+                            _this.$message({
+                                        type: 'success',
+                                        message: '恢复成功'
+                                });
+                                _this.dialogFormVisible=false;
+                        }
+                    }
+            })
                 } else {
                     
                     return false;
@@ -188,5 +246,9 @@
 }
 .dialog .el-textarea{
     width: 80%;
+}
+.goods{
+    color:#409EFF;
+    text-decoration: underline;
 }
 </style>

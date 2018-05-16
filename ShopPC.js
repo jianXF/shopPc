@@ -543,6 +543,157 @@ app.post('/orders/send', function(req,res) {
     });
 });
 
+//取消订单
+app.post('/order/delete', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql2=`UPDATE goods SET sellnum =sellnum-${req.body.goodsNum}, stock =stock+${req.body.goodsNum} where goodsId=${req.body.goodsId}`;
+        connection.query(sql2, function (error, results, fields) {   
+            if (error) throw error;
+        });
+    var sql3=`UPDATE seller_info SET goodsell =goodsell-${req.body.goodsNum} where sellerId=${req.body.sellerId}`;
+    connection.query(sql3, function (error, results, fields) {   
+        if (error) throw error;
+    });
+    console.log(sql2);
+   var sql ='DELETE FROM `order` where '+`orderId=${req.body.orderId}`
+        connection.query(sql, function (error, results, fields) {   
+            if (error) throw error;
+            res.send('success');
+        });
+    
+});
+
+//
+//查询所有商品评价列表
+app.get('/find/evaluateAll', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql='SELECT a.*,c.goodsId,c.title FROM evaluate as a,seller_info as b,goods as c  where a.goodsId = c.goodsId and  b.sellerId=c.sellerId and '+`b.sellerId=${req.query.sellerId} order by a.evaTime DESC`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send(results);
+        
+    });
+});
+
+//回复评论
+app.post('/evaluate/repaly', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var regTime = timeChange();
+    var sql=`UPDATE evaluate SET isReply=1, repalyCon='${req.body.repalyCon}' , replyTime = '${regTime}' where evaId=${req.body.evaId}`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+        
+    });
+});
+
+
+//通过条件查询评论
+app.get('/find/evaluates', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql='SELECT a.*,c.goodsId,c.title FROM evaluate as a,seller_info as b,goods as c  where a.goodsId = c.goodsId and  b.sellerId=c.sellerId and ';
+        for(var i in req.query){
+            if(i=='title'){
+               sql+=`c.${i} like '%${req.query[i]}%' and `;
+            }else if( i=='evaTime'){
+                sql+=`a.${i} like '%${req.query[i]}%' and `;
+            }else if(i=='evaType' || i=='isReply'){
+                sql+=`a.${i} = ${req.query[i]} and `;
+            }else if(i=='evaTime'){
+                sql+=`a.${i} like '${req.query[i]}%' and `;
+            }
+        }
+        sql = sql.substr(0,sql.length-4);
+        sql+=` and b.sellerId=${req.query.sellerId} order by a.evaTime DESC`;
+        console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send(results);
+        
+    });
+});
+
+//通过sellerId查看评论
+app.get('/feedback/sellerId', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql='SELECT a.*,b.title,b.goodsId FROM feedback as a,goods as b, `order` as c  where a.orderId = c.orderId '+
+     `and b.goodsId = c.goodsId and c.sellerId= ${req.query.sellerId}`;
+     if(req.query.title){
+         sql+=` and b.title like '%${req.query.title}%' `;
+     }
+     console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send(results);
+        
+    });
+});
+//反馈所有信息
+
+app.get('/feedbackAll', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql="";
+    if(req.query.feedStatus==1){
+        sql='SELECT a.*,b.title,b.goodsId,d.userId,d.tel,c.sellerId FROM feedback as a,goods as b, `order` as c , user_info as d  where a.orderId = c.orderId '+
+            `and b.goodsId = c.goodsId and d.userId=a.userId`;
+    }else{
+        sql='SELECT a.*,d.userId,d.tel FROM feedback as a, user_info as d  where '+
+            ` d.userId=a.userId and a.feedStatus = 2`;
+    }
+    
+     console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send(results);
+        
+    });
+});
+app.get('/feedback/find', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql="";
+    if(req.query.feedStatus==1){
+        sql='SELECT a.*,b.title,b.goodsId,d.userId,d.tel,c.sellerId FROM feedback as a,goods as b, `order` as c , user_info as d  where a.orderId = c.orderId '+
+            `and b.goodsId = c.goodsId and d.userId=a.userId and `;
+    }else{
+        sql='SELECT a.*,d.userId,d.tel FROM feedback as a, user_info as d  where '+
+            ` d.userId=a.userId and a.feedStatus = 2 and `;
+            
+    }
+    for(var i in req.query){
+        if(i=='tel'){
+           sql+=`d.${i} like '${req.query[i]}%' and `;
+        }else if( i=='feedTime'){
+            sql+=`a.${i} like '${req.query[i]}%' and `;
+        }else if(i=="isReply"){
+            sql+=`a.${i} = ${req.query[i]} and `;
+        }
+    }
+    sql=sql.substr(0,sql.length-4);
+     console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send(results);
+        
+    });
+});
+
+
+//回复投诉
+app.post('/feedback/replay', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var regTime = timeChange();
+    var sql=`UPDATE feedback SET isReply=1, backcontent='${req.body.backcontent}' , backTime = '${regTime}',aminId =${req.body.aminId} where backId=${req.body.backId}`;
+    console.log(sql);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send('success');
+        
+    });
+});
+
+
 app.listen(2015);
 console.log("开启服务器");
 

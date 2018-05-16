@@ -1,12 +1,7 @@
 <template>
     <div>
-        <div class="breadcrumb">
-            <el-breadcrumb separator="/">
-                <el-breadcrumb-item :to="{ path: '/menus/index' }">首页</el-breadcrumb-item>
-                <el-breadcrumb-item>商品管理</el-breadcrumb-item>
-                <el-breadcrumb-item :to="{ path: '/menus/goodsAdmin' }">商品管理</el-breadcrumb-item>
-                <el-breadcrumb-item>修改商品</el-breadcrumb-item>
-            </el-breadcrumb>
+        <div class="breadcrumb" @click="goBack">
+            <i class="el-icon-arrow-left"></i><span>商品详情</span>
         </div>
        <form action="" id="file">
               <img v-for="i in form.imgLogo" :src="i" alt="" @click="deleImg(i)"/>
@@ -180,8 +175,8 @@ export default {
       },
       //商品名称校验
       validateTitle(rule, value, callback){
-        if (value.length>16) {
-          callback(new Error('商品名称不超过16个字'));
+        if (value.length>30) {
+          callback(new Error('商品名称不超过30个字'));
         } else {
           callback();
         }
@@ -275,6 +270,9 @@ export default {
           }
           this.form.imgs = srcs;
           
+      },
+      goBack(){
+          this.$router.go(-1);
       }
   }
 };
@@ -364,5 +362,15 @@ export default {
   height: 60px;
   margin: 0 5px;
   float: left;
+}
+.el-icon-arrow-left{
+    font-size:20px;
+    font-weight:bold;
+    padding-right:5px;
+    line-height:20px;
+}
+.breadcrumb span{
+    font-size:16px;
+    line-height:20px;
 }
 </style>

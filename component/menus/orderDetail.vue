@@ -1,11 +1,7 @@
 <template>
     <div>
-        <div class="breadcrumb">
-            <el-breadcrumb separator="/">
-                <el-breadcrumb-item :to="{ path: '/menus/index' }">首页</el-breadcrumb-item>
-                <el-breadcrumb-item>订单管理</el-breadcrumb-item>
-                <el-breadcrumb-item>订单详情</el-breadcrumb-item>
-            </el-breadcrumb>
+        <div class="breadcrumb" @click="goBack">
+             <i class="el-icon-arrow-left"></i><span>订单详情</span>
         </div>
         <el-steps :active="Number(form.status)" align-center :style="{width:'60%',margin:'30px auto'}">
             <el-step title="下单" :description="form.orderTime?form.orderTime.substr(0,8):''"></el-step>
@@ -158,6 +154,9 @@ export default {
         } else {
           callback();
         }
+      },
+       goBack(){
+          this.$router.go(-1);
       }
      
   }
@@ -194,5 +193,15 @@ export default {
     border-radius: 50%;
     /* border:1px dashed darkgray; */
     margin: auto;
+}
+.el-icon-arrow-left{
+    font-size:20px;
+    font-weight:bold;
+    padding-right:5px;
+    line-height:20px;
+}
+.breadcrumb span{
+    font-size:16px;
+    line-height:20px;
 }
 </style>

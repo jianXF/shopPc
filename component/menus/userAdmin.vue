@@ -11,12 +11,12 @@
            <el-row :gutter="10">
                <el-col :span="8">
                     <el-form-item label="用户手机号:">
-                        <el-input v-model="form.tel" placeholder="请输入用户手机号"></el-input>
+                        <el-input v-model="form.tel" placeholder="请输入用户手机号" clearable></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
                     <el-form-item label="注册日期:">
-                        <el-date-picker format="yyyyMMdd" value-format="yyyyMMdd" type="date" placeholder="选择日期" v-model="form.regTime" style="width: 100%;"></el-date-picker>
+                        <el-date-picker format="yyyyMMdd" clearable value-format="yyyyMMdd" type="date" placeholder="选择日期" v-model="form.regTime" style="width: 100%;"></el-date-picker>
                     </el-form-item>
                 </el-col>
               <el-col :span="2">
@@ -34,6 +34,7 @@
                 fixed
                 prop="userId"
                 label="用户编号"
+                sortable
                 width="200">
             </el-table-column>
             <el-table-column
@@ -46,13 +47,16 @@
             <el-table-column
             label="用户手机号"
             prop="tel"
+            sortable
             width="200">
             </el-table-column>
             <el-table-column
-            prop="regTime"
             label="注册时间"
             sortable
             width="200">
+                <template slot-scope="scope">
+                    <span v-text="scope.row.regTime.substr(0,8)"></span>
+                </template>
             </el-table-column>
             <el-table-column
             fixed="right"
@@ -140,9 +144,12 @@
 
             },
             //表格的修改密码
-            checkSuccess(obj){
+            checkSuccess(obj,formName){
+                this.userForm.pass="";
+                this.userForm.repass="";
                  this.dialogFormVisible=true;
                 this.userForm.userId = obj.userId;
+
             },
            // 修改密码
             updateSubmit(formName){
@@ -174,7 +181,7 @@
             //取消修改密码
             cacelUpdate(formName){
                 this.dialogFormVisible = false;
-                this.$refs[formName].resetFields();
+                
             },
              
              //校验密码（新旧密码是否一样）

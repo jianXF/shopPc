@@ -11,12 +11,12 @@
            <el-row :gutter="10">
                <el-col :span="6">
                     <el-form-item label="商家手机号:">
-                        <el-input v-model="form.sellerTel" placeholder="请输入商家手机号"></el-input>
+                        <el-input v-model="form.sellerTel" clearable placeholder="请输入商家手机号"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
                     <el-form-item label="商家名称:">
-                        <el-input v-model="form.sellerTitle" placeholder="请输入商品名称"></el-input>
+                        <el-input v-model="form.sellerTitle" clearable placeholder="请输入商品名称"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
@@ -51,18 +51,20 @@
             label="商家名称"
             width="150">
                 <template slot-scope="scope">
-                    <a :href="'#/menus/findSellerInfo?sellerId='+scope.row.sellerId" v-text="scope.row.sellerTitle">待审核 </a>
+                    <a class="goods" :href="'#/menus/findSellerInfo?sellerId='+scope.row.sellerId" v-text="scope.row.sellerTitle">待审核 </a>
                 </template>
             </el-table-column>
             <el-table-column
             label="商家手机号"
             prop="tel"
+            sortable
             width="150">
             </el-table-column>
 
             <el-table-column
             prop="goodNum"
             label="商品种类数"
+            sortable
             width="120">
             </el-table-column>
             <el-table-column
@@ -70,6 +72,9 @@
             label="注册时间"
             sortable
             width="120">
+            <template slot-scope="scope">
+                <span v-text="scope.row.regTime.substr(0,8)"></span>
+            </template>
             </el-table-column>
             <el-table-column
             label="状态"
@@ -283,7 +288,7 @@
                         type:"get",
                         data:{
                             sellerId:obj.sellerId,
-                            type:1
+                            type:2
                         },
                         success:function(data){
                             if(data=='success'){
@@ -319,5 +324,9 @@
 }
 .el-button--text{
     float: left;
+}
+.goods{
+    color:#409EFF;
+    text-decoration: underline;
 }
 </style>

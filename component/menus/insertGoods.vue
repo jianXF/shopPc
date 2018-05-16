@@ -61,7 +61,7 @@
              <el-form-item label="商品重量" prop="heavy" 
                 :rules="[{ required: true, message: '请输入商品重量', trigger: 'blur' },
                 { validator: validateNum, trigger:'change'}]">
-                <el-input v-model.number="form.heavy" :rows="4"  placeholder="请输入商品重量"></el-input>
+                <el-input v-model.number="form.heavy" :rows="4"  placeholder="请输入商品重量(kg)"></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button  type="primary" :style="{width:'40%'}" @click="updateSubmit('form')">添加</el-button>
@@ -139,8 +139,11 @@ export default {
                             message: '添加商品成功',
                             type: 'success'
                         });
+                        _this.$refs[formName].resetFields();
+                        _this.form.imgLogo="";
+                        _this.form.imgs="";
                    }
-                   _this.$refs[formName].resetFields();
+                   
                 }
             })
           } else {
@@ -160,8 +163,8 @@ export default {
       },
       //商品名称校验
       validateTitle(rule, value, callback){
-        if (value.length>16) {
-          callback(new Error('商品名称不超过16个字'));
+        if (value.length>30) {
+          callback(new Error('商品名称不超过30个字'));
         } else {
           callback();
         }

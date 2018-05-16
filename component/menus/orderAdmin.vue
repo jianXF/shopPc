@@ -11,12 +11,12 @@
            <el-row :gutter="10">
                <el-col :span="6">
                     <el-form-item label="订单编号:">
-                        <el-input v-model="form.orderId" placeholder="请输入订单编号"></el-input>
+                        <el-input v-model="form.orderId" clearable placeholder="请输入订单编号"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
                     <el-form-item label="购买人电话:">
-                        <el-input v-model="form.tel" placeholder="请输入收货电话"></el-input>
+                        <el-input v-model="form.tel" clearable placeholder="请输入收货电话"></el-input>
                     </el-form-item>
                 </el-col>
                <el-col :span="6">
@@ -45,6 +45,7 @@
                 fixed
                 prop="orderId"
                 label="订单编号"
+                sortable
                 width="130">
             </el-table-column>
             <el-table-column
@@ -57,22 +58,33 @@
             
             <el-table-column
             label="购买金额"
+            sortable
             prop="goodsPrice"
-            width="150">
+            width="105">
             </el-table-column>
             <el-table-column
             prop="goodsNum"
+            sortable
             label="购买数量"
-            width="150">
+            width="105">
             </el-table-column>
             <el-table-column
             prop="tel"
             label="购买人电话"
+            sortable
+            width="130">
+            
+            </el-table-column>
+            <el-table-column
+            label="备注"
             width="150">
+                <template slot-scope="scope">
+                    <span v-text="scope.row.nodeinfo==''?'无':scope.row.nodeinfo"></span>
+                </template>
             </el-table-column>
             <el-table-column
             label="订单状态"
-            width="150">
+            width="120">
                 <template slot-scope="scope">
                     <span :style="{display:scope.row.status==1?'block':'none',color:'green'}">待付款 </span>
                     <span :style="{display:scope.row.status==2?'block':'none',color:'red'}">待发货 </span>
@@ -87,6 +99,7 @@
             >
             <template slot-scope="scope">
                 <el-button @click="handleClick(scope.row)" type="text" size="small">编辑</el-button>
+                <el-button type="text" size="small" v-if="scope.row.status==1" @click=" deleteOrder(scope.row)">取消订单</el-button>
                 <el-button type="text" size="small" v-if="scope.row.status==2" @click=" dialogshow(scope.row)">发货</el-button>
             </template>
             </el-table-column>
@@ -231,6 +244,48 @@
                 this.deliveryForm.deliveryId="";
                 this.dialogFormVisible=true;
                 this.selectId=obj.orderId;
+            },
+            //取消订单
+            async deleteOrder(obj){
+                const _this= this;
+                this.$confirm('是否取消订单?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(async() => {
+                   
+                    await $.ajax({
+                        url:"http://localhost:2015/order/delete",
+                        type:"POST",
+                        data:{
+                            orderId:obj.orderId,
+                            goodsId:obj.goodsId,
+                            goodsNum:obj.goodsNum,
+                            sellerId:sessionStorage.getItem("sellerId")
+                        },
+                        success:function(data){
+                            if(data=='success'){
+                                _this.$message({
+                                        type: 'success',
+                                        message: '订单取消成功!'
+                                });
+                            }
+                        
+                        }
+                    });
+                    await $.ajax({
+                                url:"http://localhost:2015/find/orderAll",
+                                type:"GET",
+                                data:{
+                                    sellerId:sessionStorage.getItem("sellerId")
+                                },
+                                success:function(data){
+                                    _this.tableData = data;
+                                }
+                        })
+                }).catch(() => {         
+                });
+			  
             }
         }
     }

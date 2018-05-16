@@ -1,12 +1,7 @@
 <template>
     <div>
-        <div class="breadcrumb">
-            <el-breadcrumb separator="/">
-                <el-breadcrumb-item :to="{ path: '/menus/index' }">首页</el-breadcrumb-item>
-                <el-breadcrumb-item>商户管理</el-breadcrumb-item>
-                <el-breadcrumb-item :to="{path: '/menus/sellerAdmin'}">商户审核注册</el-breadcrumb-item>
-                <el-breadcrumb-item>商户详情</el-breadcrumb-item>
-            </el-breadcrumb>
+        <div class="breadcrumb" @click="goBack">
+            <i class="el-icon-arrow-left"></i><span>电商详情</span>
         </div>
        <el-tooltip class="item" effect="dark" content="商户头像" placement="right-start">
           <form action="" id="file">
@@ -86,6 +81,9 @@ export default {
     })
   },
   methods: {
+      goBack(){
+          this.$router.go(-1);
+      }
       
   }
 };
@@ -145,5 +143,15 @@ export default {
   width: 100%;
   height: 100%;
   border-radius: 50%;
+}
+.el-icon-arrow-left{
+    font-size:20px;
+    font-weight:bold;
+    padding-right:5px;
+    line-height:20px;
+}
+.breadcrumb span{
+    font-size:16px;
+    line-height:20px;
 }
 </style>

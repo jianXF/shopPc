@@ -11,7 +11,7 @@
            <el-row :gutter="10">
                <el-col :span="8">
                     <el-form-item label="商品名称:">
-                        <el-input v-model="form.title" placeholder="请输入商品名称"></el-input>
+                        <el-input v-model="form.title" placeholder="请输入商品名称" clearable></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
@@ -32,6 +32,7 @@
                     <el-form-item label="是否下架:">
                         <el-select v-model="form.isSell" clearable placeholder="请选择">
                          <el-option
+                         clearable
                         v-for="item in isSellGroup"
                         :key="item.value"
                         :label="item.label"
@@ -44,6 +45,7 @@
                     <el-form-item label="是否促销:">
                         <el-select v-model="form.isBargain" clearable placeholder="请选择">
                          <el-option
+                         clearable
                             v-for="item in isBargainGroup"
                             :key="item.value"
                             :label="item.label"
@@ -66,6 +68,7 @@
             <el-table-column
                 fixed
                 prop="goodsId"
+                sortable
                 label="商品编号"
                 width="80">
             </el-table-column>
@@ -85,11 +88,13 @@
             <el-table-column
             prop="stock"
             label="库存"
+            sortable
             width="120">
             </el-table-column>
             <el-table-column
             prop="sellnum"
             label="销量"
+            sortable
             width="120">
             </el-table-column>
             <el-table-column
