@@ -70,7 +70,7 @@
                 prop="goodsId"
                 sortable
                 label="商品编号"
-                width="80">
+                width="110">
             </el-table-column>
             <el-table-column
             prop="title"
