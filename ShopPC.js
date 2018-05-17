@@ -131,7 +131,7 @@ app.post('/reg', function(req,res) {
     var sql='INSERT INTO seller_info(tel,`password`,img,sellerTitle,`desc`,goodNum,goodsell,regTime,`status`) VALUES '+`
     ('${req.body.tel}','${req.body.password}','http://localhost/shopPc/public/logo/${req.body.img}','${req.body.sellerTitle}','${req.body.desc}',0,0,${regTime},'1')`;
     console.log(sql);
-    connection.query(sql, function (error, results, fields) {   
+    connection.query(sql, function (error, results, fields) {
         if (error) throw error;
         res.send('success');
     });

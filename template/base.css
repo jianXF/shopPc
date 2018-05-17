@@ -32,3 +32,8 @@ i,em{
 .el-dialog{
     width: 40%;
 }
+.el-pagination{
+    width: 90%;
+    margin: 10px auto;
+
+}

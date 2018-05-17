@@ -41,7 +41,7 @@
            </el-row>
         </el-form>
         <el-table
-            :data="tableData"
+             :data="tableData.slice((page.currentpage-1)*page.pagesize,page.currentpage*page.pagesize)"
             border
             :style="{width: '90%',margin:'auto'}">
             <el-table-column
@@ -99,7 +99,16 @@
             </template>
             </el-table-column>
         </el-table>
-
+        <el-pagination
+            background
+            layout="total, prev, pager, next"
+            :page-size="page.pagesize"
+            :total="tableData.length"
+            :current-page="page.currentpage"
+            @size-change="handleSizeChange"
+             @current-change="handleCurrentChange"
+            >
+        </el-pagination>
         <el-dialog title="评价回复" :visible.sync="dialogFormVisible" class="dialog">
             <el-form :model="deliveryForm" ref="deliveryForm"> 
                 <el-form-item label="回复日期" :label-width="formLabelWidth" prop='repalyTime' :style="{display:deliveryForm.isReply?'block':'none'}">
@@ -145,7 +154,12 @@
                     backId:''
                 },
                 dialogFormVisible:false,
-                tableData: []
+                tableData: [],
+                page:{
+                    currentpage:1,
+                    pagesize:10
+
+                }
             }
         },
         async mounted(){
@@ -234,6 +248,13 @@
             },
             findSeller(obj){
                 this.$router.push({path:'/menus/findSellerInfo',query:{sellerId:obj.sellerId}});
+
+            },
+            handleSizeChange: function (size) {
+                this.page.pagesize = size;
+            },
+            handleCurrentChange(currentPage){
+                this.page.currentpage=currentPage;
 
             }
         }

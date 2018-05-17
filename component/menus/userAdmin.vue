@@ -27,7 +27,7 @@
            </el-row>
         </el-form>
         <el-table
-            :data="tableData"
+             :data="tableData.slice((page.currentpage-1)*page.pagesize,page.currentpage*page.pagesize)"
             border
             :style="{width: '90%',margin:'auto'}">
             <el-table-column
@@ -68,7 +68,16 @@
             </template>
             </el-table-column>
         </el-table>
-        
+        <el-pagination
+            background
+            layout="total, prev, pager, next"
+            :page-size="page.pagesize"
+            :total="tableData.length"
+            :current-page="page.currentpage"
+            @size-change="handleSizeChange"
+             @current-change="handleCurrentChange"
+            >
+        </el-pagination>
 
         <el-dialog title="修改用户密码" :visible.sync="dialogFormVisible" class="dialog">
             <el-form :model="userForm" ref="userForm" label-width="80px">
@@ -110,7 +119,12 @@
                     tel: '',
                     regTime: ''
                 },
-                tableData: []
+                tableData: [],
+                page:{
+                    currentpage:1,
+                    pagesize:10
+
+                }
             }
         },
         async mounted(){
@@ -200,6 +214,13 @@
                 callback();
                 }
             },
+            handleSizeChange: function (size) {
+                this.page.pagesize = size;
+            },
+            handleCurrentChange(currentPage){
+                this.page.currentpage=currentPage;
+
+            }
         }
     }
 </script>

@@ -22,7 +22,7 @@
            </el-row>
         </el-form>
         <el-table
-            :data="tableData"
+            :data="tableData.slice((page.currentpage-1)*page.pagesize,page.currentpage*page.pagesize)"
             border
             :style="{width: '90%',margin:'20px auto'}">
             <el-table-column
@@ -53,6 +53,16 @@
                 </template>
             </el-table-column>
         </el-table>
+        <el-pagination
+            background
+            layout="total, prev, pager, next"
+            :page-size="page.pagesize"
+            :total="tableData.length"
+            :current-page="page.currentpage"
+            @size-change="handleSizeChange"
+             @current-change="handleCurrentChange"
+            >
+        </el-pagination>
     </div>
 </template>
 
@@ -70,7 +80,12 @@
                     content: '悦诗风12312吟',
                     feedTime: '2014-04-21',
                     
-                }]
+                }],
+                page:{
+                    currentpage:1,
+                    pagesize:10
+
+                }
             }
         },
         async mounted(){
@@ -106,7 +121,15 @@
             //点击查看事件
             handleClick(obj){
 
+            },
+            handleSizeChange: function (size) {
+                this.page.pagesize = size;
+            },
+            handleCurrentChange(currentPage){
+                this.page.currentpage=currentPage;
+
             }
+            
         }
     }
 </script>
