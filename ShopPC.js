@@ -668,6 +668,8 @@ app.get('/feedback/find', function(req,res) {
             sql+=`a.${i} like '${req.query[i]}%' and `;
         }else if(i=="isReply"){
             sql+=`a.${i} = ${req.query[i]} and `;
+        }else if(i=="sellerId"){
+            sql+=`c.${i} = ${req.query[i]} and `
         }
     }
     sql=sql.substr(0,sql.length-4);
@@ -692,6 +694,29 @@ app.post('/feedback/replay', function(req,res) {
         
     });
 });
+
+
+//商户投诉统计
+app.get('/feedback/seller', function(req,res) {
+    res.append("Access-Control-Allow-Origin","*");
+    var sql="";
+        sql='SELECT a.backId,c.sellerId,e.sellerTitle,COUNT(c.sellerId) as count FROM feedback as a,goods as b, `order` as c , user_info as d, seller_info as e  where a.orderId = c.orderId '+
+            `and b.goodsId = c.goodsId and d.userId=a.userId and c.sellerId=e.sellerId and a.feedStatus =1 and `;
+    if(req.query.sellerId){
+        sql+=`e.sellerId like '%${req.query.sellerId}%' and `;
+    }
+    if(req.query.sellerTitle){
+        sql+=`e.sellerTitle like '%${req.query.sellerTitle}%' and `
+    }
+    sql=  sql.substr(0,sql.length-4);
+    connection.query(sql, function (error, results, fields) {   
+        if (error) throw error;
+        res.send(results);
+        
+    });
+});
+
+
 
 
 app.listen(2015);

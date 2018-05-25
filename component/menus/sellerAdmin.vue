@@ -44,7 +44,8 @@
                 fixed
                 prop="sellerId"
                 label="商家编号"
-                width="80">
+                sortable
+                width="120">
             </el-table-column>
             <el-table-column
             prop="sellerTitle"
@@ -89,6 +90,7 @@
             <el-table-column
             fixed="right"
             label="操作"
+            
             >
             <template slot-scope="scope">
                 <el-button @click="checkSuccess(scope.row)" type="text" size="small"

@@ -7,22 +7,25 @@
                 <el-breadcrumb-item>新增商品</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-       <form action="" id="file">
+        <el-tooltip class="item" effect="dark" content="上传您的商品封面图片列表" placement="right-start">
+            <form action="" id="file">
               <img v-for="i in form.imgLogo" :src="i" alt="" @click="deleImg(i)"/>
-              <el-tooltip class="item" effect="dark" content="上传您的商品封面图片列表" placement="right-start">
               <div class="fileName">
                     <input type="file" class="fileInput" multiple  name="sellerlogo"  @change="upload">
                     <i  class="el-icon-plus avatar-uploader-icon" ></i>
-              </div></el-tooltip>
-          </form>
+              </div>
+            </form>
+        </el-tooltip>
+        <el-tooltip class="item" effect="dark" content="上传您商品详情图片" placement="right-start">
           <form action="" id="file1">
               <img v-for="i in form.imgs" :src="i" alt="" @click="deleImg1(i)"/>
-              <el-tooltip class="item" effect="dark" content="上传您商品详情图片" placement="right-start">
+              
               <div class="fileName">
                     <input type="file" class="fileInput" multiple  name="sellerlogo"  @change="upload1">
                     <i  class="el-icon-plus avatar-uploader-icon" ></i>
-              </div></el-tooltip>
+              </div>
           </form>
+        </el-tooltip>
         <el-form ref="form" :model="form" label-width="80px" class="regOA">
              <el-form-item label="商品名称" prop="title" 
                 :rules="[{ required: true, message: '请输入商品名称', trigger: 'blur' },
@@ -295,6 +298,10 @@ export default {
     position: relative;
     margin: 20px auto;
     overflow: hidden;
+    padding:10px;
+    border:1px dashed#ded9d9;
+    border-radius: 10%;
+    border-radius: 5px;
 }
 #file .fileName{
     width:60px;
@@ -324,6 +331,10 @@ export default {
     position: relative;
     margin: 20px auto;
     overflow: hidden;
+    padding:10px;
+    border:1px dashed#ded9d9;
+    border-radius: 10%;
+    border-radius: 5px;
 }
 #file1 .fileName{
     width:60px;

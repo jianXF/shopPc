@@ -250,6 +250,13 @@
                 inputPattern: /(^[1-9]([0-9]+\.[0-9]{2})?$)|(^[0-9]\.[0-9]{2}?$)/,
                 inputErrorMessage: '输入格式不正确'
                 }).then(async({ value }) => {
+                    if(Number.parseFloat(value)>=Number.parseFloat(obj.price_n)){
+                        _this.$message({
+                            type: 'warning',
+                            message: '设置失败，促销价格需小于原价'
+                        });
+                        return;
+                    }
                     await $.ajax({
                         url:"http://localhost:2015/bargainGoods",
                         type:"POST",

@@ -92,6 +92,10 @@
                                 index:'1-1',
                                 name:'商户注册审核',
                                 path:'/menus/sellerAdmin'
+                            },{
+                                index:'1-2',
+                                name:'商户投诉统计',
+                                path:'/menus/ComplaintStatistics'
                             }]
                         },
                         {

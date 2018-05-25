@@ -31,6 +31,7 @@ import userAdmin from "./component/menus/userAdmin.vue";
 import updateInfo from "./component/menus/updateInfo.vue";
 import updatePassword from "./component/menus/updatePassword.vue";
 import findSellerInfo from "./component/menus/findSellerInfo.vue";
+import ComplaintStatistics from "./component/menus/ComplaintStatistics.vue";
 
 //状态管理
 import Vuex from 'vuex';
@@ -109,6 +110,10 @@ var router = new VueRouter({
         {
             path:'findSellerInfo',
             component:findSellerInfo
+        },
+        {
+            path:'ComplaintStatistics',
+            component:ComplaintStatistics
         }
     ]
     }]

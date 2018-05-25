@@ -1,5 +1,12 @@
 <template>
     <div class="kindAdminOA">
+        <div class="breadcrumb">
+            <el-breadcrumb separator="/">
+                <el-breadcrumb-item :to="{ path: '/menus/index' }">首页</el-breadcrumb-item>
+                <el-breadcrumb-item>商品管理</el-breadcrumb-item>
+                <el-breadcrumb-item>种类管理</el-breadcrumb-item>
+            </el-breadcrumb>
+        </div>
         <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" label-width="100px" class="demo-dynamic">
         <el-form-item
             prop="kind_f"
